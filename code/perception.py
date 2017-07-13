@@ -64,63 +64,70 @@ def color_thresh(input_img, rgb_thresh=(160, 160, 160),
     return nav_img, obs_img, rock_img
 
 
-def rover_coords(binary_img):
-    """Convert from image coords to rover coords."""
-    # Identify nonzero pixels
+def to_rover_coords(binary_img):
+    """Convert all points on img coord-frame to those on rover's frame."""
+    # Identify nonzero pixels in binary image representing
+    # region of interest e.g. rocks
     ypos, xpos = binary_img.nonzero()
-    # Calculate pixel positions with reference to the rover position
-    # being at the center bottom of the image.
-    x_pixel = -(ypos - binary_img.shape[0]).astype(np.float)
-    y_pixel = -(xpos - binary_img.shape[1]/2).astype(np.float)
-    return x_pixel, y_pixel
+
+    # Calculate pixel positions with reference to rover's coordinate
+    # frame given that rover front cam itself is at center bottom of
+    # the photographed image.
+    xpix = -(ypos - binary_img.shape[0]).astype(np.float)
+    ypix = -(xpos - binary_img.shape[1]/2).astype(np.float)
+    return xpix, ypix
 
 
-def to_polar_coords(x_pixel, y_pixel):
-    """Convert to radial coords in rover space."""
-    # Convert (x_pixel, y_pixel) to (distance, angle)
-    # in polar coordinates in rover space
-    # Calculate distance to each pixel
-    dist = np.sqrt(x_pixel**2 + y_pixel**2)
-    # Calculate angle away from vertical for each pixel
-    angles = np.arctan2(y_pixel, x_pixel)
-    return dist, angles
+def to_polar_coords(xpix, ypix):
+    """Convert cartesian coordinates to polar coordinates."""
+    # compute distance and angle of 'each' pixel from origin and
+    # vertical respectively
+    distances = np.sqrt(xpix**2 + ypix**2)
+    angles = np.arctan2(ypix, xpix)
+    return distances, angles
 
 
-def rotate_pix(xpix, ypix, yaw):
-    """Map rover space pixels to world space."""
-    # Convert yaw to radians
-    yaw_rad = yaw * np.pi / 180
-    xpix_rotated = (xpix * np.cos(yaw_rad)) - (ypix * np.sin(yaw_rad))
-    ypix_rotated = (xpix * np.sin(yaw_rad)) + (ypix * np.cos(yaw_rad))
-    # Return the result
+def rotate_pix(xpix, ypix, angle):
+    """Apply a geometric rotation."""
+    angle_rad = angle * np.pi / 180  # yaw to radians
+    xpix_rotated = (xpix * np.cos(angle_rad)) - (ypix * np.sin(angle_rad))
+    ypix_rotated = (xpix * np.sin(angle_rad)) + (ypix * np.cos(angle_rad))
     return xpix_rotated, ypix_rotated
 
 
 def translate_pix(xpix_rot, ypix_rot, xpos, ypos, scale):
-    """Apply a scaling and a translation."""
+    """Apply a geometric translation and scaling."""
     xpix_translated = (xpix_rot / scale) + xpos
     ypix_translated = (ypix_rot / scale) + ypos
-    # Return the result
     return xpix_translated, ypix_translated
 
 
 def pix_to_world(xpix, ypix, xpos, ypos, yaw, world_size, scale):
     """
-    Apply rotation and translation (and clipping).
+    Apply a geometric transformation i.e. rotation and translation to ROI.
+
+    Keyword arguments:
+    xpix, ypix -- numpy array coords of ROI being converted to world frame
+    xpos, ypos, yaw -- rover position and yaw angle in world frame
+    world_size -- integer length of the square world map (200 x 200 pixels)
+    scale -- scale factor between world frame pixels and rover frame pixels
 
     Note:
     Requires functions rotate_pix and translate_pix to work
 
     """
-    # Apply rotation
-    xpix_rot, ypix_rot = rotate_pix(xpix, ypix, yaw)
-    # Apply translation
-    xpix_tran, ypix_tran = translate_pix(xpix_rot, ypix_rot, xpos, ypos, scale)
-    # Perform rotation, translation and clipping all at once
-    x_pix_world = np.clip(np.int_(xpix_tran), 0, world_size - 1)
-    y_pix_world = np.clip(np.int_(ypix_tran), 0, world_size - 1)
-    # Return the result
-    return x_pix_world, y_pix_world
+    # Apply rotation and translation
+    xpix_rot, ypix_rot = rotate_pix(
+        xpix, ypix, yaw
+    )
+    xpix_tran, ypix_tran = translate_pix(
+        xpix_rot, ypix_rot, xpos, ypos, scale
+    )
+    # Clip pixels to be within world_size
+    xpix_world = np.clip(np.int_(xpix_tran), 0, world_size - 1)
+    ypix_world = np.clip(np.int_(ypix_tran), 0, world_size - 1)
+
+    return xpix_world, ypix_world
 
 
 def perspect_transform(img, src, dst):
