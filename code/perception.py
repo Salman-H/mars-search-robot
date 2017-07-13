@@ -185,9 +185,6 @@ def perspect_transform(input_img):
 
 def perception_step(Rover):
     """Apply above functions to update Rover state accordingly."""
-    # Perform perception steps to update Rover()
-    # TODO:
-    # NOTE: camera image is coming to you in Rover.img
     # 1) Define source and destination points for perspective transform
     # 2) Apply perspective transform
     warped_img = perspect_transform(Rover.img)
@@ -219,14 +216,13 @@ def perception_step(Rover):
         rock_x_rover, rock_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
         Rover.worldmap.shape[0], SCALE_FACTOR
     )
-
     # 7) Update Rover worldmap (to be displayed on right side of screen)
     Rover.worldmap[obs_y_world, obs_x_world, 0] += 255
     Rover.worldmap[rock_y_world, rock_x_world, 1] += 255
     Rover.worldmap[nav_y_world, nav_x_world, 2] += 255
 
     # 8) Convert rover-centric pixel positions to polar coordinates
-    # Update Rover pixel distances and angles
-    # Rover.nav_dists = rover_centric_pixel_distances
-    # Rover.nav_angles = rover_centric_angles
+    Rover.rock_dists = to_polar_coords(rock_x_rover, rock_y_rover)[0]
+    Rover.rock_angles = to_polar_coords(rock_x_rover, rock_y_rover)[1]
+
     return Rover
