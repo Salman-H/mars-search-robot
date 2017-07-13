@@ -38,6 +38,9 @@ DST_POINTS_3D = np.float32([[CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
                             [CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
                              CAM_IMG_HEIGT - DST_GRID_SIZE - BOTTOM_OFFSET]])
 
+# scale factor between world frame pixels and rover frame pixels
+SCALE_FACTOR = 10
+
 
 def color_thresh(input_img, rgb_thresh=(160, 160, 160),
                  low_bound=(75, 130, 130), upp_bound=(255, 255, 255)):
@@ -204,6 +207,18 @@ def perception_step(Rover):
     rock_x_rover, rock_y_rover = to_rover_coords(thresh_img_rock)
 
     # 6) Convert rover-centric pixel values to world coordinates
+    nav_x_world, nav_y_world = pix_to_world(
+        nav_x_rover, nav_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
+        Rover.worldmap.shape[0], SCALE_FACTOR
+    )
+    obs_x_world, obs_y_world = pix_to_world(
+        obs_x_rover, obs_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
+        Rover.worldmap.shape[0], SCALE_FACTOR
+    )
+    rock_x_world, rock_y_world = pix_to_world(
+        rock_x_rover, rock_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
+        Rover.worldmap.shape[0], SCALE_FACTOR
+    )
 
     # 7) Update Rover worldmap (to be displayed on right side of screen)
     # Example:
