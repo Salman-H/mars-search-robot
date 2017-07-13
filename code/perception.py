@@ -130,13 +130,29 @@ def pix_to_world(xpix, ypix, xpos, ypos, yaw, world_size, scale):
     return xpix_world, ypix_world
 
 
-def perspect_transform(img, src, dst):
-    """Perform a perspective transform."""
-    M = cv2.getPerspectiveTransform(src, dst)
-    warped = cv2.warpPerspective(
-        img, M,
-        (img.shape[1], img.shape[0]))  # keep same size as input image
-    return warped
+def perspect_transform(input_img, sourc_pts, destn_pts):
+    """
+    Apply a perspective transformation to input 3D image.
+
+    Keyword arguments:
+    input_img -- 3D numpy image on which perspective transform is applied
+    sourc_pts -- numpy array of four source coordinates on input 3D image
+    destn_pts -- corresponding destination coordinates on output 2D image
+
+    Return value:
+    output_img -- 2D numpy image with overhead view
+
+    """
+    transform_matrix = cv2.getPerspectiveTransform(
+        sourc_pts,
+        destn_pts
+    )
+    output_img = cv2.warpPerspective(
+        input_img,
+        transform_matrix,
+        (input_img.shape[1], input_img.shape[0])  # keep same size as input_img
+    )
+    return output_img
 
 
 def perception_step(Rover):
