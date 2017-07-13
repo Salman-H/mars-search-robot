@@ -199,6 +199,9 @@ def perception_step(Rover):
     Rover.vision_image[:, :, 2] = threshed_img_navigable*175
 
     # 5) Convert map image pixel values to rover-centric coords
+    nav_x_rover, nav_y_rover = to_rover_coords(thresh_img_nav)
+    obs_x_rover, obs_y_rover = to_rover_coords(thresh_img_obs)
+    rock_x_rover, rock_y_rover = to_rover_coords(thresh_img_rock)
 
     # 6) Convert rover-centric pixel values to world coordinates
 
