@@ -12,6 +12,33 @@ import numpy as np
 import cv2
 
 
+# CONSTANTS
+
+# rover cam image dimensions
+CAM_IMG_WIDTH = 320
+CAM_IMG_HEIGT = 160
+
+# destination warped image box where 10x10 pixel square is 1 square meter
+DST_GRID_SIZE = 10
+
+# estimated bottom offset to account for bottom of cam image not being
+# the position of the rover but a bit in front of it
+BOTTOM_OFFSET = 6
+
+# numpy array of four source coordinates on rover camera input 3D image
+SRC_POINTS_2D = np.float32([[14, 140], [301, 140], [200, 96], [118, 96]])
+
+# corresponding destination coordinates on output 2D overhead image
+DST_POINTS_3D = np.float32([[CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
+                             CAM_IMG_HEIGT - BOTTOM_OFFSET],
+                            [CAM_IMG_WIDTH/2 + DST_GRID_SIZE/2,
+                             CAM_IMG_HEIGT - BOTTOM_OFFSET],
+                            [CAM_IMG_WIDTH/2 + DST_GRID_SIZE/2,
+                             CAM_IMG_HEIGT - DST_GRID_SIZE - BOTTOM_OFFSET],
+                            [CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
+                             CAM_IMG_HEIGT - DST_GRID_SIZE - BOTTOM_OFFSET]])
+
+
 def color_thresh(input_img, rgb_thresh=(160, 160, 160),
                  low_bound=(75, 130, 130), upp_bound=(255, 255, 255)):
     """
@@ -130,22 +157,20 @@ def pix_to_world(xpix, ypix, xpos, ypos, yaw, world_size, scale):
     return xpix_world, ypix_world
 
 
-def perspect_transform(input_img, sourc_pts, destn_pts):
+def perspect_transform(input_img):
     """
     Apply a perspective transformation to input 3D image.
 
     Keyword arguments:
     input_img -- 3D numpy image on which perspective transform is applied
-    sourc_pts -- numpy array of four source coordinates on input 3D image
-    destn_pts -- corresponding destination coordinates on output 2D image
 
     Return value:
     output_img -- 2D numpy image with overhead view
 
     """
     transform_matrix = cv2.getPerspectiveTransform(
-        sourc_pts,
-        destn_pts
+        SRC_POINTS_2D,
+        DST_POINTS_3D
     )
     output_img = cv2.warpPerspective(
         input_img,
