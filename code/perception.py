@@ -12,27 +12,56 @@ import numpy as np
 import cv2
 
 
-def color_thresh(img, rgb_thresh=(160, 160, 160)):
+def color_thresh(input_img, rgb_thresh=(160, 160, 160),
+                 low_bound=(75, 130, 130), upp_bound=(255, 255, 255)):
     """
-    Identify pixels above the threshold.
+    Apply color thresholds to input image for extracting ROIs.
 
-    Threshold of RGB > 160 does a nice job of identifying ground pixels only
+    Keyword arguments:
+    input_img -- numpy image on which RGB threshold is applied
+    rgb_thresh -- RGB thresh tuple above which only ground pixels are detected
+    low_bound -- HSV lower bound tuple for color range of gold rock samples
+    upp_bound -- HSV upper bound tuple for color range of gold rock samples
+
+    Return values:
+    nav_img -- binary image identifying ground/navigable terrain pixels
+    obs_img -- binary image identifying rocks/obstacle terrain pixels
+    rock_img -- binary image identifying rock sample terrain pixels
 
     """
-    # Create an array of zeros same xy size as img, but single channel
-    color_select = np.zeros_like(img[:, :, 0])
-    # Require that each pixel be above all three threshold values in RGB
-    # above_thresh will now contain a boolean array with "True"
-    # where threshold was met
-    above_thresh = (
-        (img[:, :, 0] > rgb_thresh[0]) &
-        (img[:, :, 1] > rgb_thresh[1]) &
-        (img[:, :, 2] > rgb_thresh[2])
+    # Create arrays of zeros same xy size as input_img, but single channel
+    nav_img = np.zeros_like(input_img[:, :, 0])
+    obs_img = np.zeros_like(input_img[:, :, 0])
+
+    # Convert BGR input_img to HSV for rock samples
+    hsv_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2HSV)
+
+    # Require that each of the R(0), G(1), B(2) pixels be above all three
+    # rgb_thresh values such that pix_above_thresh will now contain a
+    # boolean array with "True" where threshold was met
+    pix_above_thresh = (
+        (input_img[:, :, 0] > rgb_thresh[0]) &
+        (input_img[:, :, 1] > rgb_thresh[1]) &
+        (input_img[:, :, 2] > rgb_thresh[2])
     )
+    pix_nonzero = (
+        (input_img[:, :, 0] > 0) &
+        (input_img[:, :, 1] > 0) &
+        (input_img[:, :, 2] > 0)
+    )
+    # obstacle pixels are those non-zero pixels where rgb_thresh was not met
+    obs_pix = np.logical_and(pix_nonzero, np.logical_not(pix_above_thresh))
+
     # Index the array of zeros with the boolean array and set to 1
-    color_select[above_thresh] = 1
+    # those pixels where ROI threshold was met
+    nav_img[pix_above_thresh] = 1
+    obs_img[obs_pix] = 1
+
+    # Threshold the HSV image to get only colors for gold rock samples
+    rock_img = cv2.inRange(hsv_img, low_bound, upp_bound)
+
     # Return the binary image
-    return color_select
+    return nav_img, obs_img, rock_img
 
 
 def rover_coords(binary_img):
