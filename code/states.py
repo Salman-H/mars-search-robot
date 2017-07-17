@@ -17,8 +17,8 @@ class FindWall():
     def execute(self, Rover):
         """Execute the FindWall state action."""
         Rover.throttle = 0
-		Rover.brake = 0
-		Rover.steer = 15
+        Rover.brake = 0
+        Rover.steer = 15
 
 
 class FollowWall():
@@ -26,11 +26,21 @@ class FollowWall():
 
     def __init__(self):
         """Initialize a FollowWall instance."""
+        self.throttle_setting = 0.8
+        self.wall_angle_offset = 9.2
         self.name = 'Follow Wall'
 
     def execute(self, Rover):
         """Execute the FollowWall state action."""
-        pass
+        if Rover.vel < Rover.max_vel:
+            Rover.throttle = self.throttle_setting
+        else:
+            Rover.throttle = 0
+
+        Rover.brake = 0
+        Rover.steer = np.clip(
+            np.mean(Rover.nav_angles_left * 180 / np.pi),
+            -15, 15) - self.wall_angle_offset
 
 
 class TurnToWall():
