@@ -92,11 +92,29 @@ class AvoidObstacles():
 
     def __init__(self):
         """Initialize a AvoidObstacles instance."""
+        self.brake_setting = 10
         self.name = 'Avoid Obstacles'
 
     def execute(self, Rover):
         """Execute the AvoidObstacles state action."""
-        pass
+        # Stop before avoiding obstacles
+        if Rover.vel > 0.2:
+            Rover.throttle = 0
+            Rover.brake = self.brake_setting
+            Rover.steer = 0
+
+        elif Rover.vel <= 0.2:
+            Rover.throttle = 0
+            Rover.brake = 0
+            # Turn left or right depending on availability
+            # of nav terrain
+            if np.mean(Rover.nav_angles) < -0.3:
+                Rover.steer = -15
+            elif np.mean(Rover.nav_angles) > 0.3:
+                Rover.steer = 15
+            else:  # e.g. if nav_angles are NaN
+                Rover.steer = 0
+                Rover.throttle = -1.0
 
 
 class GoToSample():
