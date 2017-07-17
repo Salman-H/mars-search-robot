@@ -51,7 +51,7 @@ ground_truth_3d = np.dstack(
 ).astype(np.float)
 
 
-class RoverState():
+class RoverTelemetry():
     """
     Create a class to be a container for rover state telemetry values.
 
@@ -61,7 +61,7 @@ class RoverState():
     """
 
     def __init__(self):
-        """Initialize a RoverState instance to retain state parameters."""
+        """Initialize a RoverTelemetry instance to retain telemetry parameters."""
         self.start_time = None  # To record the start time of navigation
         self.total_time = None  # To record total duration of navigation
         self.img = None  # Current camera image
@@ -113,7 +113,7 @@ class RoverState():
 
 
 # Initialize our rover
-Rover = RoverState()
+Rover = RoverTelemetry()
 
 # Variables to track frames per second (FPS)
 # Initialize frame counter
@@ -150,7 +150,7 @@ def telemetry(sid, data):
 
         if np.isfinite(Rover.vel):
 
-            # Execute perception and decision steps to update Rover's state
+            # Execute perception and decision steps to update Rover's telemetry
             Rover = perception_step(Rover)
             Rover = decision_step(Rover)
 
