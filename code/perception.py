@@ -26,10 +26,10 @@ DST_GRID_SIZE = 10
 BOTTOM_OFFSET = 6
 
 # numpy array of four source coordinates on rover camera input 3D image
-SRC_POINTS_2D = np.float32([[14, 140], [301, 140], [200, 96], [118, 96]])
+SRC_POINTS_3D = np.float32([[14, 140], [301, 140], [200, 96], [118, 96]])
 
 # corresponding destination coordinates on output 2D overhead image
-DST_POINTS_3D = np.float32([[CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
+DST_POINTS_2D = np.float32([[CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
                              CAM_IMG_HEIGT - BOTTOM_OFFSET],
                             [CAM_IMG_WIDTH/2 + DST_GRID_SIZE/2,
                              CAM_IMG_HEIGT - BOTTOM_OFFSET],
@@ -172,8 +172,8 @@ def perspect_transform(input_img):
 
     """
     transform_matrix = cv2.getPerspectiveTransform(
-        SRC_POINTS_2D,
-        DST_POINTS_3D
+        SRC_POINTS_3D,
+        DST_POINTS_2D
     )
     output_img = cv2.warpPerspective(
         input_img,
