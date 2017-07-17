@@ -1,7 +1,4 @@
-"""
-Module for rover events.
-
-"""
+"""Module for rover events."""
 
 __author__ = 'Salman Hashmi'
 __license__ = 'BSD License'
@@ -31,6 +28,16 @@ def at_left_obstacle(Rover):
     return len(Rover.nav_angles_left) < Rover.stop_forward
 
 
-def can_pickup_sample(Rover):
-    """Check if Rover ready to pickup sample."""
-    return Rover.near_sample and Rover.vel <= 0.1
+def sample_on_left(Rover):
+    """Check if sample spotted on the left."""
+    return len(Rover.rock_angles) >= 1 and np.mean(Rover.rock_angles) >= 0
+
+
+def sample_right_close(Rover):
+    """Check if sample on the right and close by."""
+    return np.mean(Rover.rock_angles) > -0.3 and np.mean(Rover.rock_dists) < 75
+
+
+def sample_in_view(Rover):
+    """Check if sample still in view."""
+    return len(Rover.rock_angles) >= 1
