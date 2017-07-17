@@ -41,3 +41,15 @@ def sample_right_close(Rover):
 def sample_in_view(Rover):
     """Check if sample still in view."""
     return len(Rover.rock_angles) >= 1
+
+
+def pointed_at_sample(Rover):
+    """Check if rover pointed at +/- some sample heading."""
+    return (len(Rover.rock_angles) >= 1 and
+               (np.mean(Rover.rock_angles) < 0.3 and
+                np.mean(Rover.rock_angles) > -0.3))
+
+
+def can_pickup_sample(Rover):
+    """Check if Rover ready to pickup sample."""
+    return Rover.near_sample and Rover.vel <= 0.1
