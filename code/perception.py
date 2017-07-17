@@ -4,9 +4,11 @@ Module for rover perception.
 Contains functions for processing rover's front camera video frames
 and updating rover state
 
-Author: Salman Hashmi
-
 """
+
+__author__ = 'Salman Hashmi, Ryan Keenan'
+__license__ = 'BSD License'
+
 
 import numpy as np
 import cv2
