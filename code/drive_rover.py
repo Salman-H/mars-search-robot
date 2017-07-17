@@ -73,20 +73,33 @@ class RoverState():
         self.steer = 0  # Current steering angle
         self.throttle = 0  # Current throttle value
         self.brake = 0  # Current brake value
+
         self.nav_angles = None  # Angles of navigable terrain pixels
+        self.nav_angles_left = None  # Nav terrain angles left of rover heading
         self.nav_dists = None  # Distances of navigable terrain pixels
+
+        self.rock_angles = None  # Angles of rock terrain pixels
+        self.rock_dists = None  # Distances to rock terrain pixels
+        self.curr_rock_angle = None  # Angle of rock currently pursued
+
         self.ground_truth = ground_truth_3d  # Ground truth worldmap
         self.mode = 'forward'  # Current mode (can be forward or stop)
         self.throttle_set = 0.2  # Throttle setting when accelerating
         self.brake_set = 10  # Brake setting when braking
 
-        # The stop_forward and go_forward fields below represent total count
-        # of navigable terrain pixels.  This is a very crude form of knowing
-        # when you can keep going and when you should stop.  Feel free to
-        # get creative in adding new fields or modifying these!
         self.stop_forward = 50  # Threshold to initiate stopping
         self.go_forward = 500  # Threshold to go forward again
         self.max_vel = 2  # Maximum velocity (meters/second)
+
+        self.samples_pos = None  # To store the actual sample positions
+        self.samples_to_find = 0  # To store the initial count of samples
+        self.samples_found = 0  # To count the number of samples found
+        self.near_sample = 0  # to be set to TLM value data["near_sample"]
+        self.picking_up = 0  # to be set to TLM value data["picking_up"]
+        self.send_pickup = False  # Set to True to trigger rock pickup
+
+        self.distance_to_home = None  # current distance to starting location 
+        self.heading_to_home = None  # current heading to starting location 
 
         # Image output from perception step
         # Update this image to display your intermediate analysis steps
@@ -97,13 +110,6 @@ class RoverState():
         # Update this image with the positions of navigable terrain
         # obstacles and rock samples
         self.worldmap = np.zeros((200, 200, 3), dtype=np.float)
-
-        self.samples_pos = None  # To store the actual sample positions
-        self.samples_to_find = 0  # To store the initial count of samples
-        self.samples_found = 0  # To count the number of samples found
-        self.near_sample = 0  # to be set to TLM value data["near_sample"]
-        self.picking_up = 0  # to be set to TLM value data["picking_up"]
-        self.send_pickup = False  # Set to True to trigger rock pickup
 
 
 # Initialize our rover
