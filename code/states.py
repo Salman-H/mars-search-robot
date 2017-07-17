@@ -48,11 +48,21 @@ class TurnToWall():
 
     def __init__(self):
         """Initialize a TurnToWall instance."""
-        self.name = 'Turn to Wall'
+        self.brake_setting = 10
+        self.name = 'Turn To Wall'
 
     def execute(self, Rover):
         """Execute the TurnToWall state action."""
-        pass
+        # Stop before turning
+        if Rover.vel > 0.2:
+            Rover.throttle = 0
+            Rover.brake = self.brake_setting
+            Rover.steer = 0
+
+        elif Rover.vel <= 0.2:
+            Rover.throttle = 0
+            Rover.brake = 0
+            Rover.steer = 15
 
 
 class AvoidWall():
