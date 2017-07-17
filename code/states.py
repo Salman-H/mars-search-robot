@@ -16,7 +16,9 @@ class FindWall():
 
     def execute(self, Rover):
         """Execute the FindWall state action."""
-        pass
+        Rover.throttle = 0
+		Rover.brake = 0
+		Rover.steer = 15
 
 
 class FollowWall():
