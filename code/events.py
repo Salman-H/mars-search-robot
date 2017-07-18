@@ -22,6 +22,19 @@ def left_path_clear(Rover):
     return len(Rover.nav_angles_left) >= 1500
 
 
+def pointed_at_nav(Rover):
+    """Check if rover pointed at +/- some nav heading."""
+    return (np.mean(Rover.nav_angles) <= 0.3 and
+            np.mean(Rover.nav_angles) >= -0.3)
+
+
+def pointed_along_wall(Rover):
+    """Check if rover has sufficient nav pixels along left wall."""
+    go_forward_wall = 500
+    return (len(Rover.nav_angles_left) > go_forward_wall and
+            np.mean(Rover.nav_angles_left*180 / np.pi)-10 > 0)
+
+
 def at_front_obstacle(Rover):
     """Check if rover is up against some obstacle."""
     front_stop_forward = 600
