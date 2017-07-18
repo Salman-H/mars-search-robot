@@ -6,29 +6,30 @@ and actuation.
 
 """
 
-__author__ = 'Salman Hashmi, Ryan Keenan'
+__author__ = 'Salman Hashmi, Ryan Keenan, Curt Welch'
 __license__ = 'BSD License'
 
 
-import argparse
-import shutil
-import base64
-from datetime import datetime
 import os
+import time
+import json
+import base64
+import shutil
+import pickle
+import argparse
+from datetime import datetime
+from io import BytesIO, StringIO
+
 import cv2
-import numpy as np
 import socketio
 import eventlet
 import eventlet.wsgi
+import numpy as np
+import matplotlib.image as mpimg
 from PIL import Image
 from flask import Flask
-from io import BytesIO, StringIO
-import json
-import pickle
-import matplotlib.image as mpimg
-import time
 
-# Import functions for perception and decision making
+
 from perception import perception_step
 from decision import decision_step
 from supporting_functions import update_rover, create_output_images
