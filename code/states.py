@@ -122,11 +122,49 @@ class GoToSample():
 
     def __init__(self):
         """Initialize a GoToSample instance."""
+        self.throttle_setting = 0.39
+        self.approach_vel = 1.0
+        self.approach_angle_bias = -0.05
+        self.drive_angle_offset = -3
+        self.brake_setting = 10
+        self.yaw_left_setting = 15
+        self.yaw_right_setting = -15
         self.name = 'Go to Sample'
 
     def execute(self, Rover):
         """Execute the GoToSample state action."""
-        pass
+        mean_rock_angle = np.mean(Rover.rock_angles) + self.approach_angle_bias
+        # stop before going to sample
+        if Rover.vel > self.approach_vel:
+            Rover.throttle = 0
+            Rover.brake = self.brake_setting
+            Rover.steer = 0
+
+        elif(Rover.vel <= self.approach_vel):
+            # yaw left if sample to left more than 0.4 rads
+            if mean_rock_angle >= 0.4:
+                Rover.throttle = 0
+                Rover.brake = 0
+                Rover.steer = self.yaw_left_setting
+            # yaw right if sample to right more than -0.4 rads
+            elif mean_rock_angle <= -0.4:
+                Rover.throttle = 0
+                Rover.brake = 0
+                Rover.steer = self.yaw_right_setting
+            # otherwise drive in the direction of mean_rock_angle
+            elif ((mean_rock_angle < 0.4 and mean_rock_angle > -0.4) or
+                  math.isnan(mean_rock_angle)):
+                Rover.brake = 0
+                Rover.throttle = self.throttle_setting
+
+                mean_rock_angle_deg = np.mean(
+                    Rover.rock_angles * 180 / np.pi) + self.drive_angle_offset
+
+                Rover.steer = np.clip(mean_rock_angle_deg,
+                                      self.yaw_right_setting,
+                                      self.yaw_left_setting)
+
+                Rover.curr_rock_angle = mean_rock_angle_deg
 
 
 class InitiatePickup():
