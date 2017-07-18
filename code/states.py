@@ -220,11 +220,14 @@ class Stop():
 
     def __init__(self):
         """Initialize a Stop instance."""
+        self.brake_setting = 10
         self.name = 'Stop'
 
     def execute(self, Rover):
         """Execute the Stop state action."""
-        pass
+        Rover.throttle = 0
+        Rover.brake = self.brake_setting
+        Rover.steer = 0
 
 
 class FullStop():
