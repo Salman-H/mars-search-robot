@@ -17,3 +17,14 @@ import numpy as np
 
 import states
 import events
+
+
+class DecisionHandler():
+	"""Handle events and switch between states."""
+
+	def __init__(self):
+		"""Initialize a DecisionHandler instance."""
+
+	def execute(self, Rover):
+		"""Select and execute the current state action."""
+
