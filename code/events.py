@@ -17,6 +17,11 @@ def front_path_clear(Rover):
     return len(Rover.nav_angles) >= Rover.go_forward
 
 
+def left_path_clear(Rover):
+    """Check if sufficient room on left."""
+    return len(Rover.nav_angles_left) >= 1500
+
+
 def at_front_obstacle(Rover):
     """Check if rover is up against some obstacle."""
     front_stop_forward = 600
