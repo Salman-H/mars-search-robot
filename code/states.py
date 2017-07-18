@@ -176,7 +176,7 @@ class InitiatePickup():
 
     def execute(self, Rover):
         """Execute the InitiatePickup state action."""
-        pass
+        Rover.send_pickup = True
 
 
 class WaitForPickupInitiate():
