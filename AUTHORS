@@ -1,0 +1,58 @@
+# As of July 19th, 2017
+
+
+# states.py
+*    Salman Hashmi
+
+
+# events.py
+*    Salman Hashmi
+
+
+# decision.py
+*    Salman Hashmi
+
+
+# decision_old.py
+*    Ryan Keenan
+
+
+# perception.py
+*    Salman Hashmi
+*    Ryan Keenan
+
+
+# supporting_functions.py
+*    Ryan Keenan
+*    Salman Hashmi
+
+
+# drive_rover.py
+*    Ryan Keenan
+*    Salman Hashmi
+*    Curt Welch
+
+
+# Rover_Project_Test_Notebook.ipynb
+*    Salman Hashmi
+*    Ryan Keenan
+
+
+# Code Owners for Robotics Nanodegree Content
+# As of July, 7th 2017
+
+
+# Default Owner
+*       @ryan-keenan
+
+# 1. Content Developer
+*       @ryan-keenan
+
+# 2. Services Lead
+*       mike.salem@udacity.com
+
+# 3. Program Lead
+*       @cdlei
+
+# 4. Mike Wales
+*       @walesmd
