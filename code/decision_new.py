@@ -57,7 +57,18 @@ class DecisionHandler():
             'done_mission': events.done_mission,
             'reached_home': events.reached_home
         }
+        self.curr_state = self.state[0]  # default state
+
+    def is_event(self, Rover, name):
+        """Check if given event has occurred."""
+        func = self.event.get(name)
+        return func(Rover)
+
+    def is_state(self, name):
+        """Check if handler is in given state."""
+        return name is self.curr_state
 
     def execute(self, Rover):
         """Select and execute the current state action."""
         pass
+
