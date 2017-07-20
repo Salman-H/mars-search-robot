@@ -75,14 +75,14 @@ class DecisionHandler():
         self.curr_state = name
 
     def find_wall(self, Rover):
-        """Handle switching from find_wall state."""
+        """Handle switching from FindWall state."""
         if Rover.yaw > 45 and Rover.yaw < 65:
             self.switch_to_state(Rover, self.state[1])  # FollowWall
         else:
             self.switch_to_state(Rover, self.curr_state)
 
     def follow_wall(self, Rover):
-        """Handle switching from follow_wall state."""
+        """Handle switching from FollowWall state."""
         if (self.is_event(Rover, 'deviated_from_wall') and
                 self.is_event(Rover, 'left_path_clear')):
             self.switch_to_state(Rover, self.state[3])  # TurnToWall
@@ -93,7 +93,13 @@ class DecisionHandler():
         elif (self.is_event(Rover, 'sample_on_left') or
                 self.is_event(Rover, 'sample_right_close')):
             self.switch_to_state(Rover, self.state[5])  # GoToSample
+        else:
+            self.switch_to_state(Rover, self.curr_state)
 
+    def avoid_wall(self, Rover):
+        """Handle switching from AvoidWall state."""
+        if self.is_event(Rover, 'pointed_along_wall'):
+            self.switch_to_state(Rover, self.state[1])  # FollowWall
         else:
             self.switch_to_state(Rover, self.curr_state)
 
