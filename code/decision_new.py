@@ -103,6 +103,14 @@ class DecisionHandler():
         else:
             self.switch_to_state(Rover, self.curr_state)
 
+    def go_to_sample(self, Rover):
+        """Handle switching from GoToSample state."""
+        if self.is_event(Rover, 'sample_in_view'):
+            if Rover.near_sample:
+                self.switch_to_state(Rover, self.state[6])  # Stop
+            else:
+                self.switch_to_state(Rover, self.curr_state)
+
     def execute(self, Rover):
         """Select and execute the current state action."""
         pass
