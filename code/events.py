@@ -35,6 +35,12 @@ def pointed_along_wall(Rover):
             np.mean(Rover.nav_angles_left*180 / np.pi)-10 > 0)
 
 
+def deviated_from_wall(Rover):
+    """Check if rover has deviated from wall beyond specified limit."""
+    wall_angle_limit = 25
+    return np.mean(Rover.nav_angles_left*180/np.pi) > wall_angle_limit
+
+
 def at_front_obstacle(Rover):
     """Check if rover is up against some obstacle."""
     front_stop_forward = 600
