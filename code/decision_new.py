@@ -68,7 +68,11 @@ class DecisionHandler():
         """Check if handler is in given state."""
         return name is self.curr_state
 
+    def switch_to_state(self, Rover, name):
+        """Update current state to the next state."""
+        name.execute(Rover)
+        self.curr_state = name
+
     def execute(self, Rover):
         """Select and execute the current state action."""
         pass
-
