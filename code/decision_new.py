@@ -74,14 +74,14 @@ class DecisionHandler():
         name.execute(Rover)
         self.curr_state = name
 
-    def find_wall(self, Rover):
+    def finding_wall(self, Rover):
         """Handle switching from FindWall state."""
         if Rover.yaw > 45 and Rover.yaw < 65:
             self.switch_to_state(Rover, self.state[1])  # FollowWall
         else:
             self.switch_to_state(Rover, self.curr_state)
 
-    def follow_wall(self, Rover):
+    def following_wall(self, Rover):
         """Handle switching from FollowWall state."""
         if (self.is_event(Rover, 'deviated_from_wall') and
                 self.is_event(Rover, 'left_path_clear')):
@@ -96,20 +96,27 @@ class DecisionHandler():
         else:
             self.switch_to_state(Rover, self.curr_state)
 
-    def avoid_wall(self, Rover):
+    def avoiding_wall(self, Rover):
         """Handle switching from AvoidWall state."""
         if self.is_event(Rover, 'pointed_along_wall'):
             self.switch_to_state(Rover, self.state[1])  # FollowWall
         else:
             self.switch_to_state(Rover, self.curr_state)
 
-    def go_to_sample(self, Rover):
+    def going_to_sample(self, Rover):
         """Handle switching from GoToSample state."""
         if self.is_event(Rover, 'sample_in_view'):
             if Rover.near_sample:
                 self.switch_to_state(Rover, self.state[6])  # Stop
             else:
                 self.switch_to_state(Rover, self.curr_state)
+
+    def stopped(self, Rover):
+        """Handle switching from Stop state."""
+        if self.is_event(Rover, 'can_pickup'):
+            self.next_state(Rover, self.state[7])  # InitiatePickup
+        else:
+            self.next_state(Rover, self.curr_state)
 
     def execute(self, Rover):
         """Select and execute the current state action."""
