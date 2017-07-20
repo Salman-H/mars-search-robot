@@ -73,6 +73,13 @@ class DecisionHandler():
         name.execute(Rover)
         self.curr_state = name
 
+    def find_wall(self, Rover):
+        """Handle switching from find_wall state."""
+        if Rover.yaw > 45 and Rover.yaw < 65:
+            self.switch_to_state(Rover, self.state[1])  # FollowWall
+        else:
+            self.switch_to_state(Rover, self.curr_state)
+
     def execute(self, Rover):
         """Select and execute the current state action."""
         pass
