@@ -114,9 +114,27 @@ class DecisionHandler():
     def stopped(self, Rover):
         """Handle switching from Stop state."""
         if self.is_event(Rover, 'can_pickup'):
-            self.next_state(Rover, self.state[7])  # InitiatePickup
+            self.switch_to_state(Rover, self.state[7])  # InitiatePickup
         else:
-            self.next_state(Rover, self.curr_state)
+            self.switch_to_state(Rover, self.curr_state)
+
+    def initiating_pickup(self, Rover):
+        """Handle switching from InitiatePickup state."""
+        self.switch_to_state(Rover, self.state[8])  # WaitForPickupInitiate
+
+    def waiting_pickup_initiate(self, Rover):
+        """Handle switching from WaitForPickupInitiate state."""
+        if Rover.picking_up == 1:
+            self.switch_to_state(Rover, self.state[9])  # WaitForPickupFinish
+        else:
+            self.switch_to_state(Rover, self.curr_state)
+
+    def waiting_pickup_finish(self, Rover):
+        """Handle switching from WaitForPickupFinish state."""
+        if Rover.picking_up == 0:
+            self.switch_to_state(Rover, self.state[2])  # AvoidWall
+        else:
+            self.switch_to_state(Rover, self.curr_state)
 
     def execute(self, Rover):
         """Select and execute the current state action."""
