@@ -47,6 +47,7 @@ class DecisionHandler():
             'left_path_clear': events.left_path_clear,
             'pointed_at_nav': events.pointed_at_nav,
             'pointed_along_wall': events.pointed_along_wall,
+            'deviated_from_wall': events.deviated_from_wall,
             'at_front_obstacle': events.at_front_obstacle,
             'at_left_obstacle': events.at_left_obstacle,
             'sample_on_left': events.sample_on_left,
@@ -77,6 +78,22 @@ class DecisionHandler():
         """Handle switching from find_wall state."""
         if Rover.yaw > 45 and Rover.yaw < 65:
             self.switch_to_state(Rover, self.state[1])  # FollowWall
+        else:
+            self.switch_to_state(Rover, self.curr_state)
+
+    def follow_wall(self, Rover):
+        """Handle switching from follow_wall state."""
+        if (self.is_event(Rover, 'deviated_from_wall') and
+                self.is_event(Rover, 'left_path_clear')):
+            self.switch_to_state(Rover, self.state[3])  # TurnToWall
+
+        elif self.is_event(Rover, 'at_left_obstacle'):
+            self.switch_to_state(Rover, self.state[2])  # AvoidWall
+
+        elif (self.is_event(Rover, 'sample_on_left') or
+                self.is_event(Rover, 'sample_right_close')):
+            self.switch_to_state(Rover, self.state[5])  # GoToSample
+
         else:
             self.switch_to_state(Rover, self.curr_state)
 
