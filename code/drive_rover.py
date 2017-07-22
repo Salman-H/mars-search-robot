@@ -75,12 +75,15 @@ class RoverTelemetry():
         self.throttle = 0  # Current throttle value
         self.brake = 0  # Current brake value
 
+        self.nav_dists = None  # Distances to navigable terrain pixels
         self.nav_angles = None  # Angles of navigable terrain pixels
         self.nav_angles_left = None  # Nav terrain angles left of rover heading
-        self.nav_dists = None  # Distances of navigable terrain pixels
 
-        self.rock_angles = None  # Angles of rock terrain pixels
+        self.obs_dists = None  # Distances to obstacle terrain pixels
+        self.obs_angles = None  # Angles of obstacle terrain pixels
+
         self.rock_dists = None  # Distances to rock terrain pixels
+        self.rock_angles = None  # Angles of rock terrain pixels
         self.curr_rock_angle = None  # Angle of rock currently pursued
 
         self.ground_truth = ground_truth_3d  # Ground truth worldmap
