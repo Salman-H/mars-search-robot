@@ -207,6 +207,8 @@ def perception_step(Rover):
     # Convert rover-centric navigable pixel positions to polar coordinates
     Rover.nav_dists = to_polar_coords(nav_x_rover, nav_y_rover)[0]
     Rover.nav_angles = to_polar_coords(nav_x_rover, nav_y_rover)[1]
+    # get subset of nav_angles that are left of rover heading
+    Rover.nav_angles_left = Rover.nav_angles[Rover.nav_angles > 0]
 
     # Convert rover-centric obstacle pixel positions to polar coordinates
     Rover.obs_dists = to_polar_coords(obs_x_rover, obs_y_rover)[0]
