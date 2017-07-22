@@ -187,25 +187,36 @@ def perspect_transform(input_img):
 
 def perception_step(Rover):
     """Apply above functions to update Rover state accordingly."""
-    # 1) Define source and destination points for perspective transform
-    # 2) Apply perspective transform
+    # Apply perspective transform
     warped_img = perspect_transform(Rover.img)
-    # 3) Apply color threshold to identify
-    #    navigable terrain/obstacles/rock samples
+    # Apply color threshold to identify
+    # navigable terrain/obstacles/rock samples
     thresh_img_nav, thresh_img_obs, thresh_img_rock = color_thresh(warped_img)
 
-    # 4) Update Rover.vision_image
-    #    (this will be displayed on left side of screen)
+    # Update Rover.vision_image
+    # (this will be displayed on left side of screen)
     Rover.vision_image[:, :, 0] = threshed_img_obstacle*135
     Rover.vision_image[:, :, 1] = threshed_img_rock
     Rover.vision_image[:, :, 2] = threshed_img_navigable*175
 
-    # 5) Convert map image pixel values to rover-centric coords
+    # Convert map image pixel values to rover-centric coords
     nav_x_rover, nav_y_rover = to_rover_coords(thresh_img_nav)
     obs_x_rover, obs_y_rover = to_rover_coords(thresh_img_obs)
     rock_x_rover, rock_y_rover = to_rover_coords(thresh_img_rock)
 
-    # 6) Convert rover-centric pixel values to world coordinates
+    # Convert rover-centric navigable pixel positions to polar coordinates
+    Rover.nav_dists = to_polar_coords(nav_x_rover, nav_y_rover)[0]
+    Rover.nav_angles = to_polar_coords(nav_x_rover, nav_y_rover)[1]
+
+    # Convert rover-centric obstacle pixel positions to polar coordinates
+    Rover.obs_dists = to_polar_coords(obs_x_rover, obs_y_rover)[0]
+    Rover.obs_angles = to_polar_coords(obs_x_rover, obs_y_rover)[1]
+
+    # Convert rover-centric rock sample pixel positions to polar coordinates
+    Rover.rock_dists = to_polar_coords(rock_x_rover, rock_y_rover)[0]
+    Rover.rock_angles = to_polar_coords(rock_x_rover, rock_y_rover)[1]
+
+    # Convert rover-centric pixel values to world coordinates
     nav_x_world, nav_y_world = pix_to_world(
         nav_x_rover, nav_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
         Rover.worldmap.shape[0], SCALE_FACTOR
@@ -218,13 +229,9 @@ def perception_step(Rover):
         rock_x_rover, rock_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
         Rover.worldmap.shape[0], SCALE_FACTOR
     )
-    # 7) Update Rover worldmap (to be displayed on right side of screen)
+    # Update Rover worldmap (to be displayed on right side of screen)
     Rover.worldmap[obs_y_world, obs_x_world, 0] += 255
     Rover.worldmap[rock_y_world, rock_x_world, 1] += 255
     Rover.worldmap[nav_y_world, nav_x_world, 2] += 255
-
-    # 8) Convert rover-centric pixel positions to polar coordinates
-    Rover.rock_dists = to_polar_coords(rock_x_rover, rock_y_rover)[0]
-    Rover.rock_angles = to_polar_coords(rock_x_rover, rock_y_rover)[1]
 
     return Rover
