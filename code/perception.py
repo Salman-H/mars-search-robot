@@ -204,24 +204,18 @@ def perception_step(Rover):
     obs_x_rover, obs_y_rover = to_rover_coords(thresh_img_obs)
     rock_x_rover, rock_y_rover = to_rover_coords(thresh_img_rock)
 
-    # Convert rover-centric navigable pixel positions to polar coordinates
-    Rover.nav_dists = to_polar_coords(nav_x_rover, nav_y_rover)[0]
-    Rover.nav_angles = to_polar_coords(nav_x_rover, nav_y_rover)[1]
+    # Convert cartesian coords of ROI pixels in rover-frame to polar coords
+    Rover.nav_dists, Rover.nav_angles = to_polar_coords(nav_x_rover,
+                                                        nav_y_rover)
+    Rover.obs_dists, Rover.obs_angles = to_polar_coords(obs_x_rover,
+                                                        obs_y_rover)
+    Rover.rock_dists, Rover.rock_angles = to_polar_coords(rock_x_rover,
+                                                          rock_y_rover)
     # get subset of nav_angles that are left of rover heading
     Rover.nav_angles_left = Rover.nav_angles[Rover.nav_angles > 0]
 
-    # Convert rover-centric obstacle pixel positions to polar coordinates
-    Rover.obs_dists = to_polar_coords(obs_x_rover, obs_y_rover)[0]
-    Rover.obs_angles = to_polar_coords(obs_x_rover, obs_y_rover)[1]
-
-    # Convert rover-centric rock sample pixel positions to polar coordinates
-    Rover.rock_dists = to_polar_coords(rock_x_rover, rock_y_rover)[0]
-    Rover.rock_angles = to_polar_coords(rock_x_rover, rock_y_rover)[1]
-
     # Discard distant ROI pixels from rover coords to improve fidelity
-    max_nav_dists = 60
-    max_obs_dists = 80
-    max_rock_dists = 70
+    max_nav_dists, max_obs_dists, max_rock_dists = 60, 80, 70
 
     # Only include rover coords less than corresponding ROI's max distance
     nav_x_rover = nav_x_rover[Rover.nav_dists < max_nav_dists]
