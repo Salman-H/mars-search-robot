@@ -103,7 +103,8 @@ class RoverTelemetry():
         self.send_pickup = False  # Set to True to trigger rock pickup
 
         self.distance_to_home = None  # current distance to starting location 
-        self.heading_to_home = None  # current heading to starting location 
+        self.heading_to_home = None  # current heading to starting location
+        self.returning_home = False  # default rover configuration
 
         # Image output from perception step
         # Update this image to display your intermediate analysis steps
