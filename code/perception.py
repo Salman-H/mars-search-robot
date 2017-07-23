@@ -218,6 +218,19 @@ def perception_step(Rover):
     Rover.rock_dists = to_polar_coords(rock_x_rover, rock_y_rover)[0]
     Rover.rock_angles = to_polar_coords(rock_x_rover, rock_y_rover)[1]
 
+    # Discard distant ROI pixels from rover coords to improve fidelity
+    max_nav_dists = 60
+    max_obs_dists = 80
+    max_rock_dists = 70
+
+    # Only include rover coords less than corresponding ROI's max distance
+    nav_x_rover = nav_x_rover[Rover.nav_dists < max_nav_dists]
+    nav_y_rover = nav_y_rover[Rover.nav_dists < max_nav_dists]
+    obs_x_rover = obs_x_rover[Rover.obs_dists < max_obs_dists]
+    obs_y_rover = obs_y_rover[Rover.obs_dists < max_obs_dists]
+    rock_x_rover = rock_x_rover[Rover.rock_dists < max_rock_dists]
+    rock_y_rover = rock_y_rover[Rover.rock_dists < max_rock_dists]
+
     # Convert rover-centric pixel values to world coordinates
     nav_x_world, nav_y_world = pix_to_world(
         nav_x_rover, nav_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
