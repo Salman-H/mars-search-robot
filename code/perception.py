@@ -96,18 +96,20 @@ def color_thresh(input_img, rgb_thresh=(160, 160, 160),
     return nav_img, obs_img, rock_img
 
 
-def to_rover_coords(binary_img):
-    """Convert all points on img coord-frame to those on rover's frame."""
-    # Identify nonzero pixels in binary image representing
-    # region of interest e.g. rocks
-    ypos, xpos = binary_img.nonzero()
+def to_rover_frame(binary_img):
+    """Transform pixel coords in binary_img frame to rover frame."""
+    # get image dimensions
+    IMG_HEIGHT, IMG_WIDTH = binary_img.shape
+
+    # Identify all nonzero pixel coords in the binary image
+    ypixs_imagef, xpixs_imagef = binary_img.nonzero()
 
     # Calculate pixel positions with reference to rover's coordinate
-    # frame given that rover front cam itself is at center bottom of
-    # the photographed image.
-    xpix = -(ypos - binary_img.shape[0]).astype(np.float)
-    ypix = -(xpos - binary_img.shape[1]/2).astype(np.float)
-    return xpix, ypix
+    # frame given that rover front camera itself is at center bottom
+    # of the photographed image
+    xpixs_roverf = -(ypixs_imagef - IMG_HEIGHT).astype(np.float)
+    ypixs_roverf = -(xpixs_imagef - IMG_WIDTH/2).astype(np.float)
+    return xpixs_roverf, ypixs_roverf
 
 
 def to_polar_coords(xpix, ypix):
