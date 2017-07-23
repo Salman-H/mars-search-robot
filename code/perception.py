@@ -14,7 +14,7 @@ import numpy as np
 import cv2
 
 
-# CONSTANTS
+# GLOBAL CONSTANTS
 
 # rover cam image dimensions
 CAM_IMG_WIDTH = 320
@@ -42,6 +42,9 @@ DST_POINTS_2D = np.float32([[CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
 
 # scale factor between world frame pixels and rover frame pixels
 SCALE_FACTOR = 10
+
+# integer length of the square world map (200 x 200 pixels)
+WORLDMAP_HEIGHT = 200
 
 
 def color_thresh(input_img, rgb_thresh=(160, 160, 160),
@@ -96,75 +99,6 @@ def color_thresh(input_img, rgb_thresh=(160, 160, 160),
     return nav_img, obs_img, rock_img
 
 
-def to_rover_frame(binary_img):
-    """Transform pixel coords in binary_img frame to rover frame."""
-    # get image dimensions
-    IMG_HEIGHT, IMG_WIDTH = binary_img.shape
-
-    # Identify all nonzero pixel coords in the binary image
-    ypixs_imagef, xpixs_imagef = binary_img.nonzero()
-
-    # Calculate pixel positions with reference to rover's coordinate
-    # frame given that rover front camera itself is at center bottom
-    # of the photographed image
-    xpixs_roverf = -(ypixs_imagef - IMG_HEIGHT).astype(np.float)
-    ypixs_roverf = -(xpixs_imagef - IMG_WIDTH/2).astype(np.float)
-    return xpixs_roverf, ypixs_roverf
-
-
-def to_polar_coords(cartesian_coords):
-    """Convert cartesian coordinates to polar coordinates."""
-    # compute distance and angle of 'each' pixel from cartesian origin 
-    # and vertical respectively
-    xpixs, ypixs = cartesian_coords
-    distances = np.sqrt(xpixs**2 + ypixs**2)
-    angles = np.arctan2(ypixs, xpixs)
-    return distances, angles
-
-
-def rotate_pix(xpix, ypix, angle):
-    """Apply a geometric rotation."""
-    angle_rad = angle * np.pi / 180  # yaw to radians
-    xpix_rotated = (xpix * np.cos(angle_rad)) - (ypix * np.sin(angle_rad))
-    ypix_rotated = (xpix * np.sin(angle_rad)) + (ypix * np.cos(angle_rad))
-    return xpix_rotated, ypix_rotated
-
-
-def translate_pix(xpix_rot, ypix_rot, xpos, ypos, scale):
-    """Apply a geometric translation and scaling."""
-    xpix_translated = (xpix_rot / scale) + xpos
-    ypix_translated = (ypix_rot / scale) + ypos
-    return xpix_translated, ypix_translated
-
-
-def pix_to_world(xpix, ypix, xpos, ypos, yaw, world_size, scale):
-    """
-    Apply a geometric transformation i.e. rotation and translation to ROI.
-
-    Keyword arguments:
-    xpix, ypix -- numpy array coords of ROI being converted to world frame
-    xpos, ypos, yaw -- rover position and yaw angle in world frame
-    world_size -- integer length of the square world map (200 x 200 pixels)
-    scale -- scale factor between world frame pixels and rover frame pixels
-
-    Note:
-    Requires functions rotate_pix and translate_pix to work
-
-    """
-    # Apply rotation and translation
-    xpix_rot, ypix_rot = rotate_pix(
-        xpix, ypix, yaw
-    )
-    xpix_tran, ypix_tran = translate_pix(
-        xpix_rot, ypix_rot, xpos, ypos, scale
-    )
-    # Clip pixels to be within world_size
-    xpix_world = np.clip(np.int_(xpix_tran), 0, world_size - 1)
-    ypix_world = np.clip(np.int_(ypix_tran), 0, world_size - 1)
-
-    return xpix_world, ypix_world
-
-
 def perspect_transform(input_img):
     """
     Apply a perspective transformation to input 3D image.
@@ -188,62 +122,137 @@ def perspect_transform(input_img):
     return output_img
 
 
+def perspect_to_rover(binary_img):
+    """Transform pixel coords from perspective frame to rover frame."""
+    # get image dimensions
+    IMG_HEIGHT, IMG_WIDTH = binary_img.shape
+
+    # Identify all nonzero pixel coords in the binary image
+    ypixs_pf, xpixs_pf = binary_img.nonzero()
+
+    # Calculate pixel positions with reference to rover's coordinate
+    # frame given that rover front camera itself is at center bottom
+    # of the photographed image
+    xpixs_rf = -(ypixs_pf - IMG_HEIGHT).astype(np.float)
+    ypixs_rf = -(xpixs_pf - IMG_WIDTH/2).astype(np.float)
+    return xpixs_rf, ypixs_rf
+
+
+def to_polar_coords(cartesian_coords):
+    """Convert cartesian coordinates to polar coordinates."""
+    # compute distance and angle of 'each' pixel from cartesian origin
+    # and vertical respectively
+    xpixs, ypixs = cartesian_coords
+    distances = np.sqrt(xpixs**2 + ypixs**2)
+    angles = np.arctan2(ypixs, xpixs)
+    return distances, angles
+
+
+def rotate_pixs(xpixs, ypixs, angle):
+    """Apply a geometric rotation to pixel coords."""
+    angle_rad = angle * np.pi / 180  # degrees to radians
+    xpixs_rotated = (xpixs * np.cos(angle_rad)) - (ypixs * np.sin(angle_rad))
+    ypixs_rotated = (xpixs * np.sin(angle_rad)) + (ypixs * np.cos(angle_rad))
+    return xpixs_rotated, ypixs_rotated
+
+
+def translate_pixs(xpixs_rot, ypixs_rot, rover_pos):
+    """Apply a geometric translation and scaling to pixel coords."""
+    rover_x, rover_y = rover_pos
+    xpixs_translated = (xpixs_rot / SCALE_FACTOR) + rover_x
+    ypixs_translated = (ypixs_rot / SCALE_FACTOR) + rover_y
+    return xpixs_translated, ypixs_translated
+
+
+def rover_to_world(xpixs_rf, ypixs_rf, rover_pos, rover_yaw):
+    """
+    Transform pixel coords of ROIs from rover frame to world frame.
+
+    Keyword arguments:
+    xpixs_rf -- numpy array of x coords of ROI pixels expressed in rover frame
+    ypixs_rf -- numpy array of y coords of ROI pixels expressed in rover frame
+    rover_pos -- rover cartesian (x,y) position in world frame
+    rover_yaw -- rover yaw angle in world frame
+
+    Return values:
+    xpixs_wf -- numpy array of x coords of ROI pixels expressed in world frame
+    xpixs_wf -- numpy array of x coords of ROI pixels expressed in world frame
+
+    """
+    # Apply rotation and translation
+    xpixs_rf_rot, ypixs_rf_rot = rotate_pixs(xpixs_rf, ypixs_rf, rover_yaw)
+
+    xpixs_rf_tran, ypixs_rf_tran = translate_pixs(xpixs_rf_rot,
+                                                  ypixs_rf_rot, rover_pos)
+    # Clip pixels to be within world_size
+    xpixs_wf = np.clip(np.int_(xpixs_rf_tran), 0, WORLDMAP_HEIGHT - 1)
+    ypixs_wf = np.clip(np.int_(ypixs_rf_tran), 0, WORLDMAP_HEIGHT - 1)
+
+    return xpixs_wf, ypixs_wf
+
+
 def perception_step(Rover):
     """Apply above functions to update Rover state accordingly."""
     # Apply perspective transform
     warped_img = perspect_transform(Rover.img)
     # Apply color threshold to identify
     # navigable terrain/obstacles/rock samples
-    thresh_img_nav, thresh_img_obs, thresh_img_rock = color_thresh(warped_img)
-
+    threshed_img_nav, threshed_img_obs, threshed_img_rock = color_thresh(
+                                                                warped_img
+                                                                )
     # Update Rover.vision_image
     # (this will be displayed on left side of screen)
-    Rover.vision_image[:, :, 0] = threshed_img_obstacle*135
+    Rover.vision_image[:, :, 0] = threshed_img_obs*135
     Rover.vision_image[:, :, 1] = threshed_img_rock
-    Rover.vision_image[:, :, 2] = threshed_img_navigable*175
+    Rover.vision_image[:, :, 2] = threshed_img_nav*175
 
-    # Convert map image pixel values to rover-centric coords
-    nav_x_rover, nav_y_rover = to_rover_coords(thresh_img_nav)
-    obs_x_rover, obs_y_rover = to_rover_coords(thresh_img_obs)
-    rock_x_rover, rock_y_rover = to_rover_coords(thresh_img_rock)
+    # Transform pixel coords of ROIs (nav/obs/rocks) from
+    # image perspective frame to rover frame
+    nav_xpixs_rf, nav_ypixs_rf = perspect_to_rover(thresh_img_nav)
+    obs_xpixs_rf, obs_ypixs_rf = perspect_to_rover(thresh_img_obs)
+    rock_xpixs_rf, rock_ypixs_rf = perspect_to_rover(thresh_img_rock)
 
-    # Convert cartesian coords of ROI pixels in rover-frame to polar coords
-    Rover.nav_dists, Rover.nav_angles = to_polar_coords(nav_x_rover,
-                                                        nav_y_rover)
-    Rover.obs_dists, Rover.obs_angles = to_polar_coords(obs_x_rover,
-                                                        obs_y_rover)
-    Rover.rock_dists, Rover.rock_angles = to_polar_coords(rock_x_rover,
-                                                          rock_y_rover)
-    # get subset of nav_angles that are left of rover heading
+    # Convert above cartesian coords to polar coords
+    Rover.nav_dists, Rover.nav_angles = to_polar_coords(nav_xpixs_rf,
+                                                        nav_ypixs_rf)
+
+    Rover.obs_dists, Rover.obs_angles = to_polar_coords(obs_xpixs_rf,
+                                                        obs_ypixs_rf)
+
+    Rover.rock_dists, Rover.rock_angles = to_polar_coords(rock_xpixs_rf,
+                                                          rock_ypixs_rf)
+    # Extract subset of nav_angles that are left of rover heading
     Rover.nav_angles_left = Rover.nav_angles[Rover.nav_angles > 0]
 
-    # Discard distant ROI pixels from rover coords to improve fidelity
-    max_nav_dists, max_obs_dists, max_rock_dists = 60, 80, 70
+    # Discard distant pixel coords of ROIs to improve fidelity
+    MAX_NAV_DISTS, MAX_OBS_DISTS, MAX_ROCK_DISTS = 60, 80, 70  # in meters
 
-    # Only include rover coords less than corresponding ROI's max distance
-    nav_x_rover = nav_x_rover[Rover.nav_dists < max_nav_dists]
-    nav_y_rover = nav_y_rover[Rover.nav_dists < max_nav_dists]
-    obs_x_rover = obs_x_rover[Rover.obs_dists < max_obs_dists]
-    obs_y_rover = obs_y_rover[Rover.obs_dists < max_obs_dists]
-    rock_x_rover = rock_x_rover[Rover.rock_dists < max_rock_dists]
-    rock_y_rover = rock_y_rover[Rover.rock_dists < max_rock_dists]
+    # Only include pixel coords of a ROI that is in range
+    nav_xpixs_rf = nav_xpixs_rf[Rover.nav_dists < MAX_NAV_DISTS]
+    nav_ypixs_rf = nav_ypixs_rf[Rover.nav_dists < MAX_NAV_DISTS]
 
-    # Convert rover-centric pixel values to world coordinates
-    nav_x_world, nav_y_world = pix_to_world(
-        nav_x_rover, nav_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
-        Rover.worldmap.shape[0], SCALE_FACTOR
-    )
-    obs_x_world, obs_y_world = pix_to_world(
-        obs_x_rover, obs_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
-        Rover.worldmap.shape[0], SCALE_FACTOR
-    )
-    rock_x_world, rock_y_world = pix_to_world(
-        rock_x_rover, rock_y_rover, Rover.pos[0], Rover.pos[1], Rover.yaw,
-        Rover.worldmap.shape[0], SCALE_FACTOR
-    )
+    obs_xpixs_rf = obs_xpixs_rf[Rover.obs_dists < MAX_OBS_DISTS]
+    obs_ypixs_rf = obs_ypixs_rf[Rover.obs_dists < MAX_OBS_DISTS]
+
+    rock_xpixs_rf = rock_xpixs_rf[Rover.rock_dists < MAX_ROCK_DISTS]
+    rock_ypixs_rf = rock_ypixs_rf[Rover.rock_dists < MAX_ROCK_DISTS]
+
+    # Transform pixel coords of ROIs (nav/obs/rocks) from
+    # rover frame to world frame
+    nav_xpixs_wf, nav_ypixs_wf = rover_to_world(nav_xpixs_rf,
+                                                nav_ypixs_rf,
+                                                Rover.pos, Rover.yaw)
+
+    obs_xpixs_wf, obs_ypixs_wf = rover_to_world(obs_xpixs_rf,
+                                                obs_ypixs_rf,
+                                                Rover.pos, Rover.yaw)
+
+    rock_xpixs_wf, rock_ypixs_wf = rover_to_world(rock_xpixs_rf,
+                                                  rock_ypixs_rf,
+                                                  Rover.pos, Rover.yaw)
     # Update Rover worldmap (to be displayed on right side of screen)
-    Rover.worldmap[obs_y_world, obs_x_world, 0] += 255
-    Rover.worldmap[rock_y_world, rock_x_world, 1] += 255
-    Rover.worldmap[nav_y_world, nav_x_world, 2] += 255
+    Rover.worldmap[obs_ypixs_wf, obs_xpixs_wf, 0] += 255
+    Rover.worldmap[rock_ypixs_wf, rock_xpixs_wf, 1] += 255
+    Rover.worldmap[nav_ypixs_wf, nav_xpixs_wf, 2] += 255
 
     return Rover
