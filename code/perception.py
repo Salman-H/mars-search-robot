@@ -112,12 +112,13 @@ def to_rover_frame(binary_img):
     return xpixs_roverf, ypixs_roverf
 
 
-def to_polar_coords(xpix, ypix):
+def to_polar_coords(cartesian_coords):
     """Convert cartesian coordinates to polar coordinates."""
-    # compute distance and angle of 'each' pixel from origin and
-    # vertical respectively
-    distances = np.sqrt(xpix**2 + ypix**2)
-    angles = np.arctan2(ypix, xpix)
+    # compute distance and angle of 'each' pixel from cartesian origin 
+    # and vertical respectively
+    xpixs, ypixs = cartesian_coords
+    distances = np.sqrt(xpixs**2 + ypixs**2)
+    angles = np.arctan2(ypixs, xpixs)
     return distances, angles
 
 
