@@ -242,6 +242,28 @@ def rover_to_world(pixpts_rf, rover_pos, rover_yaw):
     return pixpts_wf
 
 
+def inv_translate_pixpts(pixpts_wf, translation):
+    """
+    Inverse translate pixel points from world frame.
+
+    Keyword arguments:
+    pixpts_wf -- namedtuple of numpy arrays of x,y pixel points in world frame
+    translation -- tuple of displacements along x,y in world frame
+
+    Return values:
+    pixpts_rot -- namedtuple of numpy arrays of pixel x,y points in prior
+                  rotated positions
+    """
+    translation_x, translation_y = translation
+    xpix_pts_rotated = (pixpts_wf.x - translation_x) * SCALE_FACTOR
+    ypix_pts_rotated = (pixpts_wf.y - translation_y) * SCALE_FACTOR
+
+    PixPointsRot = namedtuple('PixPointsRot', 'x y')
+    pixpts_rot = PixPointsRot(xpix_pts_rotated, ypix_pts_rotated)
+
+    return pixpts_rot
+
+
 def perception_step(Rover):
     """
     Sense environment with rover camera and update rover state accordingly.
