@@ -228,12 +228,12 @@ def rover_to_world(pixpts_rf, rover_pos, rover_yaw):
 
     """
     # Apply rotation and translation
-    pixpts_rf_rot = rotate_pixpts(pixpts_rf, rover_yaw)
-    pixpts_rf_tran = translate_pixpts(pixpts_rf_rot, rover_pos)
+    pixpts_rot = rotate_pixpts(pixpts_rf, rover_yaw)
+    pixpts_tran = translate_pixpts(pixpts_rot, rover_pos)
 
     # Clip pixels to be within world_size
-    xpix_pts_wf = np.clip(np.int_(pixpts_rf_tran.x), 0, WORLDMAP_HEIGHT - 1)
-    ypix_pts_wf = np.clip(np.int_(pixpts_rf_tran.y), 0, WORLDMAP_HEIGHT - 1)
+    xpix_pts_wf = np.clip(np.int_(pixpts_tran.x), 0, WORLDMAP_HEIGHT - 1)
+    ypix_pts_wf = np.clip(np.int_(pixpts_tran.y), 0, WORLDMAP_HEIGHT - 1)
 
     # Define a named tuple for the points of the three ROIs
     PixPointsWf = namedtuple('PixPointsWf', 'x y')
@@ -284,6 +284,26 @@ def inv_rotate_pixpts(pixpts_rot, angle):
     pixpts = PixPoints(xpix_pts, ypix_pts)
 
     return pixpts
+
+
+def world_to_rover(pixpts_wf, rover_pos, rover_yaw):
+    """
+    Transform pixel points of ROIs from world frame to rover frame.
+
+    Keyword arguments:
+    pixpts_wf -- tuple of numpy arrays of x,y pixel points in world frame
+    rover_pos -- tuple of rover x,y position in world frame
+    rover_yaw -- rover yaw angle in world frame
+
+    Return values:
+    pixpts_rf -- namedtuple of numpy arrays of pixel x,y points in rover frame
+
+    """
+    # Apply inverse translation and rotation
+    pixpts_rot = inv_translate_pixpts(pixpts_wf, rover_pos)
+    pixpts_rf = inv_rotate_pix(pixpts_rot, rover_yaw)
+
+    return pixpts_rf
 
 
 def perception_step(Rover):
