@@ -264,6 +264,28 @@ def inv_translate_pixpts(pixpts_wf, translation):
     return pixpts_rot
 
 
+def inv_rotate_pixpts(pixpts_rot, angle):
+    """
+    Inverse rotate rotated pixel points to their original positions.
+
+    Keyword arguments:
+    pixpts_rot -- namedtuple of numpy arrays of x,y pixel points rotated
+    angle -- rotation angle in degrees
+
+    Return values:
+    pixpts -- namedtuple of numpy arrays of pixel x,y points in 
+              original positions
+    """
+    angle_rad = angle * np.pi / 180  # degrees to radians
+    xpix_pts = pixpts_rot.x * np.cos(angle) + pixpts_rot.y * np.sin(angle)
+    ypix_pts = -pixpts_rot.x * np.sin(angle) + pixpts_rot.y * np.cos(angle)
+
+    PixPoints = namedtuple('PixPoints', 'x y')
+    pixpts = PixPoints(xpix_pts, ypix_pts)
+
+    return pixpts
+
+
 def perception_step(Rover):
     """
     Sense environment with rover camera and update rover state accordingly.
