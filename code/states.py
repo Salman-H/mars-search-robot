@@ -9,40 +9,55 @@ import numpy as np
 from perception import world_to_rover, to_polar_coords
 
 
+# MODULE-ONLY GLOBAL CONSTANTS:
+
+TO_DEG = 180./np.pi  # conversion factor between radians and degrees
+
+
 class FindWall():
     """Create a class to represent FindWall state."""
 
     def __init__(self):
         """Initialize a FindWall instance."""
-        self.name = 'Find Wall'
+        self.YAW_LEFT_SET = 15  # degrees
+        self.NAME = 'Find Wall'
 
     def execute(self, Rover):
         """Execute the FindWall state action."""
         Rover.throttle = 0
         Rover.brake = 0
-        Rover.steer = 15
+        Rover.steer = self.YAW_LEFT_SET
 
 
 class FollowWall():
     """Create a class to represent FollowWall state."""
 
     def __init__(self):
-        """Initialize a FollowWall instance."""
-        self.throttle_setting = 0.8
-        self.wall_angle_offset = 9.2
-        self.name = 'Follow Wall'
+        """
+        Initialize a FollowWall instance.
+
+        NOTE: Making wall angle offset more negative will cause
+              sharper left turns and more frequent encounters with wall
+        """
+        self.YAW_LEFT_SET = 15          # degrees
+        self.YAW_RIGHT_SET = -15        # degrees
+        self.THROTTLE_SET = 0.8         # 5 is max
+        self.wall_angle_offset = -0.16  # radians
+        self.NAME = 'Follow Wall'
 
     def execute(self, Rover):
         """Execute the FollowWall state action."""
-        if Rover.vel < Rover.max_vel:
-            Rover.throttle = self.throttle_setting
+        # Add negative bias to nav angles left of rover to follow wall
+        wall_heading = Rover.nav_angles_left + self.wall_angle_offset
+        # Drive below max velocity
+        if Rover.vel < Rover.MAX_VEL:
+            Rover.throttle = self.THROTTLE_SET
         else:
             Rover.throttle = 0
-
+        # Steer to keep at heading that follows wall
         Rover.brake = 0
-        Rover.steer = np.clip(
-            np.mean(Rover.nav_angles_left * 180 / np.pi),
-            -15, 15) - self.wall_angle_offset
+        Rover.steer = np.clip(wall_heading*TO_DEG,
+                              self.YAW_RIGHT_SET, self.YAW_LEFT_SET)
 
 
 class TurnToWall():
@@ -50,21 +65,23 @@ class TurnToWall():
 
     def __init__(self):
         """Initialize a TurnToWall instance."""
-        self.brake_setting = 10
-        self.name = 'Turn To Wall'
+        self.MAX_VEL = 0.2         # meters/sec
+        self.BRAKE_SET = 10        # 10 is max
+        self.YAW_LEFT_SET = 15     # degrees
+        self.NAME = 'Turn To Wall'
 
     def execute(self, Rover):
         """Execute the TurnToWall state action."""
         # Stop before turning
-        if Rover.vel > 0.2:
+        if Rover.vel > self.MAX_VEL:
             Rover.throttle = 0
-            Rover.brake = self.brake_setting
+            Rover.brake = self.BRAKE_SET
             Rover.steer = 0
-
-        elif Rover.vel <= 0.2:
+        # Turn left towards wall
+        elif Rover.vel <= self.MAX_VEL:
             Rover.throttle = 0
             Rover.brake = 0
-            Rover.steer = 15  # turn left towards wall
+            Rover.steer = self.YAW_LEFT_SET
 
 
 class AvoidWall():
@@ -72,21 +89,23 @@ class AvoidWall():
 
     def __init__(self):
         """Initialize a AvoidWall instance."""
-        self.brake_setting = 10
-        self.name = 'Avoid Wall'
+        self.MAX_VEL = 0.2        # meters/sec
+        self.BRAKE_SET = 10       # 10 is max
+        self.YAW_RIGHT_SET = -15  # degrees
+        self.NAME = 'Avoid Wall'
 
     def execute(self, Rover):
         """Execute the AvoidWall state action."""
-        # Stop before turning away from wall
-        if Rover.vel > 0.2:
+        # Stop before turning
+        if Rover.vel > self.MAX_VEL:
             Rover.throttle = 0
-            Rover.brake = self.brake_setting
+            Rover.brake = self.BRAKE_SET
             Rover.steer = 0
-
-        elif Rover.vel <= 0.2:
+        # Turn right to avoid left wall
+        elif Rover.vel <= self.MAX_VEL:
             Rover.throttle = 0
             Rover.brake = 0
-            Rover.steer = -15  # turn right away from wall
+            Rover.steer = self.YAW_RIGHT_SET
 
 
 class AvoidObstacles():
@@ -94,27 +113,32 @@ class AvoidObstacles():
 
     def __init__(self):
         """Initialize a AvoidObstacles instance."""
-        self.brake_setting = 10
-        self.name = 'Avoid Obstacles'
+        self.MAX_VEL = 0.2            # meters/sec
+        self.BRAKE_SET = 10           # 10 is max
+        self.YAW_LEFT_SET = 15        # degrees
+        self.YAW_RIGHT_SET = -15      # degrees
+        self.NAME = 'Avoid Obstacles'
 
     def execute(self, Rover):
         """Execute the AvoidObstacles state action."""
+        nav_heading = np.mean(Rover.nav_angles)  # NOTE: in radians
         # Stop before avoiding obstacles
-        if Rover.vel > 0.2:
+        if Rover.vel > self.MAX_VEL:
             Rover.throttle = 0
-            Rover.brake = self.brake_setting
+            Rover.brake = self.BRAKE_SET
             Rover.steer = 0
-
-        elif Rover.vel <= 0.2:
+        # Turn left or right depending on where nav terrain is
+        elif Rover.vel <= self.MAX_VEL:
             Rover.throttle = 0
             Rover.brake = 0
-            # Turn left or right depending on availability
-            # of nav terrain
-            if np.mean(Rover.nav_angles) < -0.3:
-                Rover.steer = -15
-            elif np.mean(Rover.nav_angles) > 0.3:
-                Rover.steer = 15
-            else:  # e.g. if nav_angles are NaN
+            # Turn right if nav terrain is more than 0.3 rads to the right
+            if nav_heading < -0.3:
+                Rover.steer = self.YAW_RIGHT_SET
+            # Turn left if nav terrain is more than 0.3 rads to the left
+            elif nav_heading > 0.3:
+                Rover.steer = self.YAW_LEFT_SET
+            # Back up e.g. if nav_angles are NaN
+            else:
                 Rover.steer = 0
                 Rover.throttle = -1.0
 
@@ -124,49 +148,43 @@ class GoToSample():
 
     def __init__(self):
         """Initialize a GoToSample instance."""
-        self.throttle_setting = 0.39
-        self.approach_vel = 1.0
-        self.approach_angle_bias = -0.05
-        self.drive_angle_offset = -3
-        self.brake_setting = 10
-        self.yaw_left_setting = 15
-        self.yaw_right_setting = -15
-        self.name = 'Go to Sample'
+        self.THROTTLE_SET = 0.39   # 5 is max
+        self.APPROACH_VEL = 1.0    # meters/sec
+        self.HEADING_BIAS = -0.05  # radians
+        self.BRAKE_SET = 10        # 10 is max
+        self.YAW_LEFT_SET = 15     # degrees
+        self.YAW_RIGHT_SET = -15   # degrees
+        self.NAME = 'Go to Sample'
 
     def execute(self, Rover):
         """Execute the GoToSample state action."""
-        mean_rock_angle = np.mean(Rover.rock_angles) + self.approach_angle_bias
-        # stop before going to sample
-        if Rover.vel > self.approach_vel:
+        # Add slight right bias to heading so as not to bump in left wall
+        # NOTE: rock_heading values are in radians
+        rock_heading = np.mean(Rover.rock_angles) + self.HEADING_BIAS
+        # Stop before going to sample
+        if Rover.vel > self.APPROACH_VEL:
             Rover.throttle = 0
-            Rover.brake = self.brake_setting
+            Rover.brake = self.BRAKE_SET
             Rover.steer = 0
-
-        elif(Rover.vel <= self.approach_vel):
-            # yaw left if sample to left more than 0.4 rads
-            if mean_rock_angle >= 0.4:
+        elif(Rover.vel <= self.APPROACH_VEL):
+            # Yaw left if rock sample to left more than 0.4 rads
+            if rock_heading >= 0.4:
                 Rover.throttle = 0
                 Rover.brake = 0
-                Rover.steer = self.yaw_left_setting
-            # yaw right if sample to right more than -0.4 rads
-            elif mean_rock_angle <= -0.4:
+                Rover.steer = self.YAW_LEFT_SET
+            # Yaw right if rock sample to right more than -0.4 rads
+            elif rock_heading <= -0.4:
                 Rover.throttle = 0
                 Rover.brake = 0
-                Rover.steer = self.yaw_right_setting
-            # otherwise drive in the direction of mean_rock_angle
-            elif ((mean_rock_angle < 0.4 and mean_rock_angle > -0.4) or
-                  math.isnan(mean_rock_angle)):
+                Rover.steer = self.YAW_RIGHT_SET
+            # Otherwise drive at average rock sample heading
+            elif -0.4 < rock_heading < 0.4 or math.isnan(rock_heading):
                 Rover.brake = 0
-                Rover.throttle = self.throttle_setting
-
-                mean_rock_angle_deg = np.mean(
-                    Rover.rock_angles * 180 / np.pi) + self.drive_angle_offset
-
-                Rover.steer = np.clip(mean_rock_angle_deg,
-                                      self.yaw_right_setting,
-                                      self.yaw_left_setting)
-
-                Rover.curr_rock_angle = mean_rock_angle_deg
+                Rover.throttle = self.THROTTLE_SET
+                Rover.steer = np.clip(rock_heading*TO_DEG,
+                                      self.YAW_RIGHT_SET, self.YAW_LEFT_SET)
+                # Keep track of the heading to last pursued rock
+                Rover.curr_rock_angle = rock_heading*TO_DEG
 
 
 class InitiatePickup():
@@ -174,7 +192,7 @@ class InitiatePickup():
 
     def __init__(self):
         """Initialize a InitiatePickup instance."""
-        self.name = 'Initiate Pickup'
+        self.NAME = 'Initiate Pickup'
 
     def execute(self, Rover):
         """Execute the InitiatePickup state action."""
@@ -186,7 +204,7 @@ class WaitForPickupInitiate():
 
     def __init__(self):
         """Initialize a WaitForPickupInitiate instance."""
-        self.name = 'Wait..'
+        self.NAME = 'Wait..'
 
     def execute(self, Rover):
         """Execute the WaitForPickupInitiate state action."""
@@ -198,7 +216,7 @@ class WaitForPickupFinish():
 
     def __init__(self):
         """Initialize a WaitForPickupFinish instance."""
-        self.name = 'Pickup Sample.'
+        self.NAME = 'Pickup Sample.'
 
     def execute(self, Rover):
         """Execute the WaitForPickupFinish state action."""
@@ -210,71 +228,83 @@ class ReturnHome():
 
     def __init__(self):
         """Initialize a ReturnHome instance."""
+        # Home coordinates in world frame
         self.home_pixpts_wf = np.array([99.7]), np.array([85.6])
-        # home approach velocities
-        self.max_vel = 2.0
-        self.slow_vel = 1.0
-        self.park_vel = 0.5
-        # corresponding throttle settings
-        self.max_throttle_set = 0.8
-        self.slow_throttle_set = 0.2
-        self.park_throttle_set = 0.3
-        # brake setting
-        self.brake_set = 10
-        self.name = 'Return Home'
+        # Home approach velocities in meters/sec
+        self.MAX_VEL = 2.0
+        self.SLOW_VEL = 1.0
+        self.PARK_VEL = 0.5
+        # Corresponding throttle sets (5 is max)
+        self.MAX_THROTTLE_SET = 0.8
+        self.SLOW_THROTTLE_SET = 0.2
+        self.PARK_THROTTLE_SET = 0.3
+        # Yaw settings in degrees
+        self.YAW_LEFT_SET = 15
+        self.YAW_RIGHT_SET = -15
+        # Brake setting (10 is max)
+        self.BRAKE_SET = 10
+        self.NAME = 'Return Home'
 
     def execute(self, Rover):
         """Execute the ReturnHome state action."""
-        # Define conversion factor between radians and degrees
-        to_deg = 180./np.pi
         # Transform home coordinates to rover frame
         home_pixpts_rf = world_to_rover(self.home_pixpts_wf, Rover.pos)
         home_distances, home_headings = to_polar_coords(home_pixpts_rf)
         # Update Rover home polar coordinates
-        Rover.home_distance = np.mean(home_distances)
-        Rover.home_heading = np.mean(home_headings)
-        # Drive at a weighted average of home and nav headings using 3:7 ratio
-        avg_nav_heading = np.mean(Rover.nav_angles)
-        home_nav_heading = 0.3*Rover.home_heading + (1 - 0.3)*avg_nav_heading
+        Rover.home_distance = np.mean(home_distances)  # NOTE: in meters
+        Rover.home_heading = np.mean(home_headings)    # NOTE: in radians
+
+        # Drive at a weighted average of home and nav headings with a 3:7 ratio
+        nav_heading = np.mean(Rover.nav_angles)
+        homenav_heading = 0.3*Rover.home_heading + (1 - 0.3)*nav_heading
+
         # Keep within max velocity
-        if Rover.vel < self.max_vel:
-            Rover.throttle = self.max_throttle_set
+        if Rover.vel < self.MAX_VEL:
+            Rover.throttle = self.MAX_THROTTLE_SET
         else:
             Rover.throttle = 0
-        # NOTE: Below distances are in meters
+
         # Approach at pure nav heading
         if Rover.home_distance > 450:
             Rover.brake = 0
-            Rover.steer = np.clip(avg_nav_heading*to_deg, -15, 15)
-        # Approach at the weighted average home plus nav headings
+            Rover.steer = np.clip(nav_heading*TO_DEG,
+                                  self.YAW_RIGHT_SET, self.YAW_LEFT_SET)
+        # Approach at the weighted average home and nav headings
         elif 200 < Rover.home_distance <= 450:
             Rover.brake = 0
-            Rover.steer = np.clip(home_nav_heading*to_deg, -15, 15)
-        # Approach at home plus nav headings and slow down
+            Rover.steer = np.clip(homenav_heading*TO_DEG,
+                                  self.YAW_RIGHT_SET, self.YAW_LEFT_SET)
+        # Slow down while keeping current heading
         elif 100 < Rover.home_distance <= 200:
-            if Rover.vel < self.slow_vel:
-                Rover.throttle = slow_throttle_set
+            if Rover.vel < self.SLOW_VEL:
+                Rover.throttle = SLOW_THROTTLE_SET
             else:
                 Rover.throttle = 0
             Rover.brake = 0
-            Rover.steer = np.clip(home_nav_heading*to_deg, -15, 15)
+            Rover.steer = np.clip(homenav_heading*TO_DEG,
+                                  self.YAW_RIGHT_SET, self.YAW_LEFT_SET)
         # Precisely approach at pure home heading and slow down for parking
         elif Rover.home_distance <= 100:
-            if Rover.vel > self.park_vel:
+            if Rover.vel > self.PARK_VEL:
                 Rover.throttle = 0
-                Rover.brake = self.brake_set
+                Rover.brake = self.BRAKE_SET
                 Rover.steer = 0
-            elif Rover.vel <= self.park_vel:
+            elif Rover.vel <= self.PARK_VEL:
                 Rover.brake = 0
+                # yaw left if home to the left more than -0.4 rads
                 if Rover.home_heading >= 0.4:
                     Rover.throttle = 0
-                    Rover.steer = 15
+                    Rover.steer = self.YAW_LEFT_SET
+                # yaw right if home to the right more than -0.4 rads
                 elif Rover.home_heading <= -0.4:
                     Rover.throttle = 0
-                    Rover.steer = -15
+                    Rover.steer = self.YAW_RIGHT_SET
+                # otherwise tread slowly at pure home heading
                 elif -0.4 < Rover.home_heading < 0.4:
-                    Rover.throttle = self.park_throttle_set
-                    Rover.steer = np.clip(Rover.home_heading*to_deg, -15, 15)
+                    Rover.throttle = self.PARK_THROTTLE_SET
+                    Rover.steer = np.clip(Rover.home_heading*TO_DEG,
+                                          self.YAW_RIGHT_SET,
+                                          self.YAW_LEFT_SET)
 
 
 class Stop():
@@ -282,13 +312,13 @@ class Stop():
 
     def __init__(self):
         """Initialize a Stop instance."""
-        self.brake_setting = 10
-        self.name = 'Stop'
+        self.BRAKE_SET = 10
+        self.NAME = 'Stop'
 
     def execute(self, Rover):
         """Execute the Stop state action."""
         Rover.throttle = 0
-        Rover.brake = self.brake_setting
+        Rover.brake = self.BRAKE_SET
         Rover.steer = 0
 
 
@@ -297,7 +327,7 @@ class FullStop():
 
     def __init__(self):
         """Initialize a FullStop instance."""
-        self.name = 'Full Stop'
+        self.NAME = 'Full Stop!'
 
     def execute(self, Rover):
         """Execute the FullStop state action."""
