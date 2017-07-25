@@ -322,11 +322,11 @@ class Stop():
         Rover.steer = 0
 
 
-class FullStop():
-    """Create a class to represent FullStop state."""
+class Park():
+    """Create a class to represent Park state."""
 
     def __init__(self):
-        """Initialize a FullStop instance."""
+        """Initialize a Park instance."""
         # Home coordinates in world frame
         self.home_pixpts_wf = np.array([99.7]), np.array([85.6])
         self.MIN_VEL = 0.2         # meters/sec
@@ -336,7 +336,7 @@ class FullStop():
         self.name = 'Reached Home!'
 
     def execute(self, Rover):
-        """Execute the FullStop state action."""
+        """Execute the Park state action."""
         # Transform home coordinates to rover frame
         home_pixpts_rf = world_to_rover(self.home_pixpts_wf, Rover.pos)
         home_distances, home_headings = to_polar_coords(home_pixpts_rf)

@@ -38,7 +38,7 @@ class DecisionHandler():
             9: states.WaitForPickupFinish(),
             10: states.ReturnHome(),
             11: states.AvoidObstacles(),
-            12: states.FullStop()
+            12: states.Park()
         }
         # define the set of events
         self.event = {
@@ -141,9 +141,13 @@ class DecisionHandler():
         if self.is_event(Rover, 'at_front_obstacle'):
             self.switch_to_state(Rover, self.state[10])  # ReturnHome
         elif self.is_event(Rover, 'reached_home'):
-            self.switch_to_state(Rover, self.state[12])  # FullStop
+            self.switch_to_state(Rover, self.state[12])  # Park
         else:
             self.next_state(Rover, self.curr_state)
+
+    def parking(self, Rover):
+        """Handle switching from Park state."""
+        self.next_state(Rover, self.state[12])  # Reamin in Park
 
     def execute(self, Rover):
         """Select and execute the current state action."""
