@@ -162,7 +162,7 @@ def create_output_images(Rover):
     tot_map_pix = np.float(len((Rover.ground_truth[:, :, 1].nonzero()[0])))
 
     # Calculate % of ground truth map that has been successfully found
-    perc_mapped = round(100*good_nav_pix / tot_map_pix, 1)
+    Rover.perc_mapped = round(100*good_nav_pix / tot_map_pix, 1)
 
     # Calculate the number of good map pixel detections divided by total pixels
     # found to be navigable terrain
@@ -177,7 +177,7 @@ def create_output_images(Rover):
     cv2.putText(map_add, "Time: "+str(np.round(Rover.total_time, 1))+' s',
                 (0, 10), cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
 
-    cv2.putText(map_add, "Mapped: "+str(perc_mapped)+'%',
+    cv2.putText(map_add, "Mapped: "+str(Rover.perc_mapped)+'%',
                 (0, 25), cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
 
     cv2.putText(map_add, "Fidelity: "+str(fidelity)+'%',

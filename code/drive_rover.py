@@ -62,7 +62,7 @@ class RoverTelemetry():
     """
 
     def __init__(self):
-        """Initialize a RoverTelemetry instance to retain telemetry parameters."""
+        """Initialize a RoverTelemetry instance to retain parameters."""
         self.start_time = None  # To record the start time of navigation
         self.total_time = None  # To record total duration of navigation
         self.img = None  # Current camera image
@@ -102,8 +102,9 @@ class RoverTelemetry():
         self.picking_up = 0  # to be set to TLM value data["picking_up"]
         self.send_pickup = False  # Set to True to trigger rock pickup
 
-        self.distance_to_home = None  # current distance to starting location 
-        self.heading_to_home = None  # current heading to starting location
+        self.home_distance = None  # current distance to starting location
+        self.home_heading = None  # current heading to starting location
+
         self.returning_home = False  # default rover configuration
 
         # Image output from perception step
@@ -115,6 +116,8 @@ class RoverTelemetry():
         # Update this image with the positions of navigable terrain
         # obstacles and rock samples
         self.worldmap = np.zeros((200, 200, 3), dtype=np.float)
+        # To update % of ground truth map successfully found
+        self.perc_mapped = 0
 
 
 # Initialize our rover
