@@ -327,8 +327,40 @@ class FullStop():
 
     def __init__(self):
         """Initialize a FullStop instance."""
-        self.NAME = 'Full Stop!'
+        # Home coordinates in world frame
+        self.home_pixpts_wf = np.array([99.7]), np.array([85.6])
+        self.MIN_VEL = 0.2         # meters/sec
+        self.BRAKE_SET = 10        # 10 is max
+        self.YAW_LEFT_SET = 15     # degrees
+        self.YAW_RIGHT_SET = -15   # degrees
+        self.name = 'Reached Home!'
 
     def execute(self, Rover):
         """Execute the FullStop state action."""
-        pass
+        # Transform home coordinates to rover frame
+        home_pixpts_rf = world_to_rover(self.home_pixpts_wf, Rover.pos)
+        home_distances, home_headings = to_polar_coords(home_pixpts_rf)
+        # Update Rover home polar coordinates
+        Rover.home_heading = np.mean(home_headings)  # NOTE: in radians
+
+        # Brake if still moving
+        if Rover.vel > self.MIN_VEL:
+            Rover.throttle = 0
+            Rover.brake = self.BRAKE_SET
+            Rover.steer = 0
+        # Otherwise orient to within +/- 0.17 rad of heading at start time
+        elif Rover.vel <= self.MIN_VEL:
+            # Yaw left if rock sample to left more than 0.17 rads
+            if Rover.home_heading >= 0.17:
+                Rover.throttle = 0
+                Rover.brake = 0
+                Rover.steer = self.YAW_LEFT_SET
+            # Yaw right if rock sample to right more than 0.17 rads
+            elif Rover.home_heading <= -0.17:
+                Rover.throttle = 0
+                Rover.brake = 0
+                Rover.steer = self.YAW_RIGHT_SET
+            # Otherwise stop
+            elif -0.17 < Rover.home_heading < 0.17:
+                Rover.steer = 0
+                Rover.brake = self.brake_set
