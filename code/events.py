@@ -77,3 +77,14 @@ def pointed_at_sample(Rover):
 def can_pickup_sample(Rover):
     """Check if Rover ready to pickup sample."""
     return Rover.near_sample and Rover.vel <= 0.1
+
+
+def completed_mission(Rover):
+    """Check if rover has completed mission criteria."""
+    return ((Rover.samples_found >= 6 and Rover.perc_mapped >= 95.0) or
+            Rover.total_time >= 700)
+
+
+def reached_home(Rover):
+    """Check if rover has reached home after completing mission."""
+    return Rover.returning_home and Rover.distance_to_home < 5
