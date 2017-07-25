@@ -55,7 +55,7 @@ class DecisionHandler():
             'sample_in_view': events.sample_in_view,
             'pointed_at_sample': events.pointed_at_sample,
             'can_pickup_sample': events.can_pickup_sample,
-            'done_mission': events.done_mission,
+            'completed_mission': events.completed_mission,
             'reached_home': events.reached_home
         }
         self.curr_state = self.state[0]  # default state
@@ -135,6 +135,15 @@ class DecisionHandler():
             self.switch_to_state(Rover, self.state[2])  # AvoidWall
         else:
             self.switch_to_state(Rover, self.curr_state)
+
+    def returning_home(self, Rover):
+        """Handle switching from ReturnHome state."""
+        if self.is_event(Rover, 'at_front_obstacle'):
+            self.switch_to_state(Rover, self.state[10])  # ReturnHome
+        elif self.is_event(Rover, 'reached_home'):
+            self.switch_to_state(Rover, self.state[12])  # FullStop
+        else:
+            self.next_state(Rover, self.curr_state)
 
     def execute(self, Rover):
         """Select and execute the current state action."""
