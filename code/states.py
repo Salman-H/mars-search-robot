@@ -6,6 +6,8 @@ __license__ = 'BSD License'
 
 import numpy as np
 
+from perception import world_to_rover, to_polar_coords
+
 
 class FindWall():
     """Create a class to represent FindWall state."""
@@ -208,11 +210,71 @@ class ReturnHome():
 
     def __init__(self):
         """Initialize a ReturnHome instance."""
+        self.home_pixpts_wf = np.array([99.7]), np.array([85.6])
+        # home approach velocities
+        self.max_vel = 2.0
+        self.slow_vel = 1.0
+        self.park_vel = 0.5
+        # corresponding throttle settings
+        self.max_throttle_set = 0.8
+        self.slow_throttle_set = 0.2
+        self.park_throttle_set = 0.3
+        # brake setting
+        self.brake_set = 10
         self.name = 'Return Home'
 
     def execute(self, Rover):
         """Execute the ReturnHome state action."""
-        pass
+        # Define conversion factor between radians and degrees
+        to_deg = 180./np.pi
+        # Transform home coordinates to rover frame
+        home_pixpts_rf = world_to_rover(self.home_pixpts_wf, Rover.pos)
+        home_distances, home_headings = to_polar_coords(home_pixpts_rf)
+        # Update Rover home polar coordinates
+        Rover.home_distance = np.mean(home_distances)
+        Rover.home_heading = np.mean(home_headings)
+        # Drive at a weighted average of home and nav headings using 3:7 ratio
+        avg_nav_heading = np.mean(Rover.nav_angles)
+        home_nav_heading = 0.3*Rover.home_heading + (1 - 0.3)*avg_nav_heading
+        # Keep within max velocity
+        if Rover.vel < self.max_vel:
+            Rover.throttle = self.max_throttle_set
+        else:
+            Rover.throttle = 0
+        # NOTE: Below distances are in meters
+        # Approach at pure nav heading
+        if Rover.home_distance > 450:
+            Rover.brake = 0
+            Rover.steer = np.clip(avg_nav_heading*to_deg, -15, 15)
+        # Approach at the weighted average home plus nav headings
+        elif 200 < Rover.home_distance <= 450:
+            Rover.brake = 0
+            Rover.steer = np.clip(home_nav_heading*to_deg, -15, 15)
+        # Approach at home plus nav headings and slow down
+        elif 100 < Rover.home_distance <= 200:
+            if Rover.vel < self.slow_vel:
+                Rover.throttle = slow_throttle_set
+            else:
+                Rover.throttle = 0
+            Rover.brake = 0
+            Rover.steer = np.clip(home_nav_heading*to_deg, -15, 15)
+        # Precisely approach at pure home heading and slow down for parking
+        elif Rover.home_distance <= 100:
+            if Rover.vel > self.park_vel:
+                Rover.throttle = 0
+                Rover.brake = self.brake_set
+                Rover.steer = 0
+            elif Rover.vel <= self.park_vel:
+                Rover.brake = 0
+                if Rover.home_heading >= 0.4:
+                    Rover.throttle = 0
+                    Rover.steer = 15
+                elif Rover.home_heading <= -0.4:
+                    Rover.throttle = 0
+                    Rover.steer = -15
+                elif -0.4 < Rover.home_heading < 0.4:
+                    Rover.throttle = self.park_throttle_set
+                    Rover.steer = np.clip(Rover.home_heading*to_deg, -15, 15)
 
 
 class Stop():
