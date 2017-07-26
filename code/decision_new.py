@@ -65,6 +65,18 @@ class DecisionHandler():
         func = self.event.get(name)
         return func(Rover)
 
+    def either_events(self, Rover, name1, name2):
+        """Check if either events have occurred."""
+        func1 = self.event.get(name1)
+        func2 = self.event.get(name2)
+        return func1(Rover) or func2(Rover)
+
+    def both_events(self, Rover, name1, name2):
+        """Check if both events have occurred."""
+        func1 = self.event.get(name1)
+        func2 = self.event.get(name2)
+        return func1(Rover) and func2(Rover)
+
     def is_state(self, name):
         """Check if handler is in given state."""
         return name is self.curr_state
@@ -106,15 +118,13 @@ class DecisionHandler():
         """Handle switching from FollowWall state."""
         # time in seconds allowed to remain stuck in this state
         stucktime = 2.0
-        if (self.is_event(Rover, 'deviated_from_wall') and
-                self.is_event(Rover, 'left_path_clear')):
+        if self.both_events(Rover, 'deviated_from_wall', 'left_path_clear'):
             self.switch_to_state(Rover, self.state[2])  # TurnToWall
 
         elif self.is_event(Rover, 'at_left_obstacle'):
             self.switch_to_state(Rover, self.state[3])  # AvoidWall
 
-        elif (self.is_event(Rover, 'sample_on_left') or
-                self.is_event(Rover, 'sample_right_close')):
+        elif self.either_events(Rover, 'sample_on_left', 'sample_right_close'):
             self.switch_to_state(Rover, self.state[5])  # GoToSample
 
         elif self.is_stuck_for(Rover, stucktime):
