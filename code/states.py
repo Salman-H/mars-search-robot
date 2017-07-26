@@ -223,6 +223,51 @@ class WaitForPickupFinish():
         pass
 
 
+class GetUnstuck():
+    """class for GetUnstuck state."""
+    def __init__(self):
+        """Initialize a GetUnstuck instance."""
+        self.THROTTLE_SET = 1.0    # 5 is max
+        self.YAW_LEFT_SET = 15     # degrees
+        self.YAW_RIGHT_SET = -15   # degrees
+        self.OBS_OFFSET_YAW = 35   # degrees
+        self.name = 'Get Unstuck'
+
+    def execute(self, Rover):
+        nav_heading = np.mean(Rover.nav_angles)  # NOTE: in radians
+
+        # Yaw value measured from either
+        # right or left of the obstacle
+        obs_offset_yaw = np.absolute(Rover.yaw -
+                                     Rover.stuck_heading)  # NOTE: in degrees
+        #  If returning home
+        if Rover.returning_home:
+            Rover.throttle = 0
+            Rover.brake = 0
+            # Yaw right if home to the right more than 0.3 rads
+            if nav_heading < -0.3:
+                Rover.steer = self.YAW_RIGHT_SET
+            # Yaw left if home to the left more than 0.3 rads
+            elif nav_heading > 0.3:
+                Rover.steer = self.YAW_LEFT_SET
+            # Otherise still Yaw left to try to get free
+            else:
+                Rover.steer = 0
+                Rover.steer = self.YAW_LEFT_SET
+        # Else if following left wall then turn to right to break free
+        else:
+            # Keep turning right until away from obstacle by OBS_OFFSET_YAW..
+            if obs_offset_yaw < self.OBS_OFFSET_YAW:
+                Rover.throttle = 0
+                Rover.brake = 0
+                Rover.steer = self.YAW_RIGHT_SET
+            # ..at witch point drive straight
+            else:
+                Rover.brake = 0
+                Rover.steer = 0
+                Rover.throttle = self.THROTTLE_SET
+
+
 class ReturnHome():
     """Create a class to represent ReturnHome state."""
 
