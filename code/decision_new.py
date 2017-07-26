@@ -56,7 +56,8 @@ class DecisionHandler():
             'pointed_at_sample': events.pointed_at_sample,
             'can_pickup_sample': events.can_pickup_sample,
             'completed_mission': events.completed_mission,
-            'reached_home': events.reached_home
+            'reached_home': events.reached_home,
+            'is_stuck:': events.is_stuck
         }
         self.curr_state = self.state[0]  # default state
 

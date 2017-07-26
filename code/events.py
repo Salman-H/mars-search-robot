@@ -4,6 +4,8 @@ __author__ = 'Salman Hashmi'
 __license__ = 'BSD License'
 
 
+import time
+
 import numpy as np
 
 
@@ -77,6 +79,30 @@ def pointed_at_sample(Rover):
 def can_pickup_sample(Rover):
     """Check if Rover ready to pickup sample."""
     return Rover.near_sample and Rover.vel <= 0.1
+
+
+def is_stuck(self, max_stucktime, Rover):
+    """Check if rover is stuck for max_stucktime."""
+    starttime = 0.0
+    exceeded_stucktime = False
+
+    if Rover.vel < 0.1:  # If not moving
+
+        if not Rover.timer_on:  # If timer OFF then start timer 
+            starttime = time.time()
+            Rover.stuck_heading = Rover.yaw
+            Rover.timer_on = True
+        
+        else:  # If timer already ON then check if time exceeded
+            endtime = time.time()
+            stucktime = endtime - starttime
+            exceeded_stucktime = stucktime > max_stucktime
+
+    else:  # Otherwise if started to move then reset timer
+        Rover.timer_on = False
+        Rover.stuck_heading = 0.0
+
+    return exceeded_stucktime
 
 
 def completed_mission(Rover):

@@ -98,14 +98,16 @@ class RoverTelemetry():
         self.samples_pos = None  # To store the actual sample positions
         self.samples_to_find = 0  # To store the initial count of samples
         self.samples_found = 0  # To count the number of samples found
-        self.near_sample = 0  # to be set to TLM value data["near_sample"]
-        self.picking_up = 0  # to be set to TLM value data["picking_up"]
+        self.near_sample = 0  # To be set to TLM value data["near_sample"]
+        self.picking_up = 0  # To be set to TLM value data["picking_up"]
         self.send_pickup = False  # Set to True to trigger rock pickup
 
-        self.home_distance = None  # current distance to starting location
-        self.home_heading = None  # current heading to starting location
+        self.home_distance = None  # Current distance to starting location
+        self.home_heading = None  # Current heading to starting location
+        self.returning_home = False  # Default rover configuration
 
-        self.returning_home = False  # default rover configuration
+        self.timer_on = False  # Timer to determine duration of stuck
+        self.stuck_heading = 0.0  # Heading at the time of getting stuck
 
         # Image output from perception step
         # Update this image to display your intermediate analysis steps
