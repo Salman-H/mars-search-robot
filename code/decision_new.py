@@ -56,8 +56,7 @@ class DecisionHandler():
             'pointed_at_sample': events.pointed_at_sample,
             'can_pickup_sample': events.can_pickup_sample,
             'completed_mission': events.completed_mission,
-            'reached_home': events.reached_home,
-            'is_stuck:': events.is_stuck
+            'reached_home': events.reached_home
         }
         self.curr_state = self.state[0]  # default state
 
@@ -77,6 +76,8 @@ class DecisionHandler():
 
     def is_stuck_for(self, Rover, stucktime):
         """Check if rover is stuck for stucktime."""
+        # NOTE: Timer is switched ON whenever velocity drops below 0.1 m/s,
+        #       Timer is switched OFF/Reset whenever stucktime is exceeded
         starttime = 0.0
         exceeded_stucktime = False
         if Rover.vel < 0.1:  # If not moving then check since when
@@ -87,7 +88,9 @@ class DecisionHandler():
             else:  # If timer already ON then check if stucktime exceeded
                 endtime = time.time()
                 exceeded_stucktime = (endtime - starttime) > stucktime
-        else:  # Otherwise if started to move then reset timer
+                if exceeded_stucktime:
+                    Rover.timer_on = False
+        else:  # Otherwise if started to move then switch OFF/Reset timer
             Rover.timer_on = False
             Rover.stuck_heading = 0.0
         return exceeded_stucktime
