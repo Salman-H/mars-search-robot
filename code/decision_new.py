@@ -75,6 +75,23 @@ class DecisionHandler():
         name.execute(Rover)
         self.curr_state = name
 
+    def is_stuck_for(self, Rover, stucktime):
+        """Check if rover is stuck for stucktime."""
+        starttime = 0.0
+        exceeded_stucktime = False
+        if Rover.vel < 0.1:  # If not moving then check since when
+            if not Rover.timer_on:  # If timer OFF then start timer
+                starttime = time.time()
+                Rover.stuck_heading = Rover.yaw
+                Rover.timer_on = True
+            else:  # If timer already ON then check if stucktime exceeded
+                endtime = time.time()
+                exceeded_stucktime = (endtime - starttime) > stucktime
+        else:  # Otherwise if started to move then reset timer
+            Rover.timer_on = False
+            Rover.stuck_heading = 0.0
+        return exceeded_stucktime
+
     def finding_wall(self, Rover):
         """Handle switching from FindWall state."""
         if Rover.yaw > 45 and Rover.yaw < 65:
@@ -137,6 +154,19 @@ class DecisionHandler():
         else:
             self.switch_to_state(Rover, self.curr_state)
 
+    def getting_unstuck(self, Rover):
+        """Handle switching from GetUnstuck state."""
+        # If reached sufficient velocity or stuck while in GetUnstuck state
+        # then get out of GetUnstuck state
+        stucktime = 2.0  # seconds
+        if Rover.vel >= 1.0 or self.is_stuck_for(Rover, stucktime):
+            if Rover.going_home:
+                self.switch_to_state(Rover, self.state[10])  # ReturnHome
+            else:
+                self.switch_to_state(Rover, self.state[1])  # FollowWall
+        else:
+            self.switch_to_state(Rover, self.curr_state)
+
     def returning_home(self, Rover):
         """Handle switching from ReturnHome state."""
         if self.is_event(Rover, 'at_front_obstacle'):
@@ -144,11 +174,11 @@ class DecisionHandler():
         elif self.is_event(Rover, 'reached_home'):
             self.switch_to_state(Rover, self.state[12])  # Park
         else:
-            self.next_state(Rover, self.curr_state)
+            self.switch_to_state(Rover, self.curr_state)
 
     def parking(self, Rover):
         """Handle switching from Park state."""
-        self.next_state(Rover, self.state[12])  # Reamin in Park
+        self.switch_to_state(Rover, self.state[12])  # Remain in Park
 
     def execute(self, Rover):
         """Select and execute the current state action."""
