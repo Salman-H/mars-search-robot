@@ -15,38 +15,7 @@ from collections import namedtuple
 import numpy as np
 import cv2
 
-
-# GLOBAL CONSTANTS
-
-# rover cam image dimensions
-CAM_IMG_WIDTH = 320
-CAM_IMG_HEIGT = 160
-
-# destination warped image box where 10x10 pixel square is 1 square meter
-DST_GRID_SIZE = 10
-
-# estimated bottom offset to account for bottom of cam image not being
-# the position of the rover but a bit in front of it
-BOTTOM_OFFSET = 6
-
-# numpy array of four source coordinates on rover camera input 3D image
-SRC_POINTS_3D = np.float32([[14, 140], [301, 140], [200, 96], [118, 96]])
-
-# corresponding destination coordinates on output 2D overhead image
-DST_POINTS_2D = np.float32([[CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
-                             CAM_IMG_HEIGT - BOTTOM_OFFSET],
-                            [CAM_IMG_WIDTH/2 + DST_GRID_SIZE/2,
-                             CAM_IMG_HEIGT - BOTTOM_OFFSET],
-                            [CAM_IMG_WIDTH/2 + DST_GRID_SIZE/2,
-                             CAM_IMG_HEIGT - DST_GRID_SIZE - BOTTOM_OFFSET],
-                            [CAM_IMG_WIDTH/2 - DST_GRID_SIZE/2,
-                             CAM_IMG_HEIGT - DST_GRID_SIZE - BOTTOM_OFFSET]])
-
-# scale factor between world frame pixels and rover frame pixels
-SCALE_FACTOR = 10
-
-# integer length of the square world map (200 x 200 pixels)
-WORLDMAP_HEIGHT = 200
+from constants import TO_DEG, TO_RAD
 
 
 def color_thresh(input_img, rgb_thresh=(160, 160, 160),
@@ -59,7 +28,7 @@ def color_thresh(input_img, rgb_thresh=(160, 160, 160),
     rgb_thresh -- RGB thresh tuple above which only ground pixels are detected
     low/up_bounds -- HSV tuples defining color range of gold rock samples
 
-    Return values:
+    Return value:
     thresh_imgs -- namedtuple of binary images identifying nav/obs/rock pixels
 
     """
@@ -73,20 +42,18 @@ def color_thresh(input_img, rgb_thresh=(160, 160, 160),
     # Require that each of the R(0), G(1), B(2) pixels be above all three
     # rgb_thresh values such that pixpts_above_thresh will now contain a
     # boolean array with "True" where threshold was met
-    pixpts_above_thresh = (
-        (input_img[:, :, 0] > rgb_thresh[0]) &
-        (input_img[:, :, 1] > rgb_thresh[1]) &
-        (input_img[:, :, 2] > rgb_thresh[2])
-    )
-    pixpts_nonzero = (
-        (input_img[:, :, 0] > 0) &
-        (input_img[:, :, 1] > 0) &
-        (input_img[:, :, 2] > 0)
-    )
-    # obstacle pixels are those non-zero pixels where rgb_thresh was not met
-    obs_pixpts = np.logical_and(pixpts_nonzero,
-                                np.logical_not(pixpts_above_thresh))
+    pixpts_above_thresh = ((input_img[:, :, 0] > rgb_thresh[0])
+                           & (input_img[:, :, 1] > rgb_thresh[1])
+                           & (input_img[:, :, 2] > rgb_thresh[2]))
 
+    pixpts_nonzero = ((input_img[:, :, 0] > 0)
+                      & (input_img[:, :, 1] > 0)
+                      & (input_img[:, :, 2] > 0))
+
+    # obstacle pixels are those non-zero pixels where rgb_thresh was not met
+    obs_pixpts = np.logical_and(
+        pixpts_nonzero, np.logical_not(pixpts_above_thresh)
+        )
     # Index the array of zeros with the boolean array and set to 1
     # those pixels where ROI threshold was met
     nav_img[pixpts_above_thresh] = 1
@@ -102,42 +69,66 @@ def color_thresh(input_img, rgb_thresh=(160, 160, 160),
     return thresh_imgs
 
 
-def perspect_transform(input_img):
+def perspect_transform(src_img, dst_grid=10, bottom_offset=6):
     """
     Apply a perspective transformation to input 3D image.
 
     Keyword arguments:
-    input_img -- 3D numpy image on which perspective transform is applied
+    src_img -- 3D numpy image on which perspective transform is applied
+    dst_grid -- size of 2D output image box of 10x10 pixels equaling 1 Sq m
+    bottom_offset -- bottom of cam image is some distance in front of rover
 
     Return value:
-    output_img -- 2D warped numpy image with overhead view
+    dst_img -- 2D warped numpy image with overhead view
 
     """
-    transform_matrix = cv2.getPerspectiveTransform(
-        SRC_POINTS_3D,
-        DST_POINTS_2D
-    )
-    output_img = cv2.warpPerspective(
-        input_img,
-        transform_matrix,
-        (input_img.shape[1], input_img.shape[0])  # keep same size as input_img
-    )
-    return output_img
+    # Dimension of source image from rover camera
+    height, width = src_img.shape
+
+    # Numpy array of four source points defining a grid on input 3D image
+    # acquired from calibration data in test notebook
+    src_x1, src_y1 = 14, 140
+    src_x2, src_y2 = 301, 140
+    src_x3, src_y3 = 200, 96
+    src_x4, src_y4 = 118, 96
+
+    # Corresponding destination points on output 2D overhead image
+    dst_x1, dst_y1 = (width/2 - dst_grid/2), (height-bottom_offset)
+    dst_x2, dst_y2 = (width/2 + dst_grid/2), (height-bottom_offset)
+    dst_x3, dst_y3 = (width/2 + dst_grid/2), (height-dst_grid-bottom_offset)
+    dst_x4, dst_y4 = (width/2 - dst_grid/2), (height-dst_grid-bottom_offset)
+
+    src_points_3d = np.float32([[src_x1, src_y1],
+                                [src_x2, src_y2],
+                                [src_x3, src_y3],
+                                [src_x4, src_y4]])
+
+    dst_points_2d = np.float32([[dst_x1, dst_y1],
+                                [dst_x2, dst_y2],
+                                [dst_x3, dst_y3],
+                                [dst_x4, dst_y4]])
+
+    transform_matrix = cv2.getPerspectiveTransform(src_points_3d,
+                                                   dst_points_2d)
+    # Keep same size as source image
+    dst_img = cv2.warpPerspective(src_img, transform_matrix, (width, height))
+
+    return dst_img
 
 
 def perspect_to_rover(binary_img):
     """
     Transform pixel points from perspective frame to rover frame.
 
-    Keyword argument:
+    Keyword arguments:
     binary_img -- single channel 2D warped numpy image in perspective frame
 
     Return value:
     pixpts_rf -- namedtuple of numpy arrays of pixel x,y points in rover frame
 
     """
-    # get image dimensions
-    IMG_HEIGHT, IMG_WIDTH = binary_img.shape
+    # Dimension of input image
+    height, width = binary_img.shape
 
     # Identify all nonzero pixel coords in the binary image
     ypix_pts_pf, xpix_pts_pf = binary_img.nonzero()
@@ -145,8 +136,8 @@ def perspect_to_rover(binary_img):
     # Calculate pixel positions with reference to rover's coordinate
     # frame given that rover front camera itself is at center bottom
     # of the photographed image
-    xpix_pts_rf = -(ypix_pts_pf - IMG_HEIGHT).astype(np.float)
-    ypix_pts_rf = -(xpix_pts_pf - IMG_WIDTH/2).astype(np.float)
+    xpix_pts_rf = -(ypix_pts_pf - height).astype(np.float)
+    ypix_pts_rf = -(xpix_pts_pf - width/2).astype(np.float)
 
     # Define a named tuple for the three regions of interest
     PixPointsRf = namedtuple('PixPointsRf', 'x y')
@@ -157,7 +148,7 @@ def perspect_to_rover(binary_img):
 
 def to_polar_coords(pixpts):
     """Convert cartesian coordinates of pixels to polar coordinates."""
-    # compute distances and angles of each pixel from rover
+    # Compute distances and angles of each pixel from rover
     dists_to_pixpts = np.sqrt(pixpts.x**2 + pixpts.y**2)
     angles_to_pixpts = np.arctan2(pixpts.y, pixpts.x)
 
@@ -176,14 +167,11 @@ def rotate_pixpts(pixpts, angle):
     pixpts_rot -- namedtuple of numpy arrays of pixel x,y points rotated
 
     """
-    angle_rad = angle * np.pi / 180  # degrees to radians
+    angle = angle*TO_RAD
     xpix_pts, ypix_pts = pixpts
 
-    xpix_pts_rotated = ((xpix_pts * np.cos(angle_rad)) -
-                        (ypix_pts * np.sin(angle_rad)))
-
-    ypix_pts_rotated = ((xpix_pts * np.sin(angle_rad)) +
-                        (ypix_pts * np.cos(angle_rad)))
+    xpix_pts_rotated = xpix_pts*np.cos(angle) - ypix_pts*np.sin(angle)
+    ypix_pts_rotated = xpix_pts*np.sin(angle) + ypix_pts*np.cos(angle)
 
     PixPointsRot = namedtuple('PixPointsRot', 'x y')
     pixpts_rot = PixPointsRot(xpix_pts_rotated, ypix_pts_rotated)
@@ -191,22 +179,23 @@ def rotate_pixpts(pixpts, angle):
     return pixpts_rot
 
 
-def translate_pixpts(pixpts_rot, rover_pos):
+def translate_pixpts(pixpts_rot, rover_pos, scale_factor=10):
     """
     Geometrically translate rotated pixel points by rover position.
 
     Keyword arguments:
     pixpts_rot -- namedtuple of numpy arrays of pixel x,y points rotated
     rover_pos -- tuple of rover x,y position in world frame
+    scale_factor -- between world and rover frame pixels
 
-    Return values:
+    Return value:
     pixpts_tran -- namedtuple of numpy arrays of pixel x,y points translated
 
     """
     rover_x, rover_y = rover_pos
 
-    xpix_pts_translated = (pixpts_rot.x / SCALE_FACTOR) + rover_x
-    ypix_pts_translated = (pixpts_rot.y / SCALE_FACTOR) + rover_y
+    xpix_pts_translated = pixpts_rot.x/scale_factor + rover_x
+    ypix_pts_translated = pixpts_rot.y/scale_factor + rover_y
 
     PixPointsTran = namedtuple('PixPointsTran', 'x y')
     pixpts_tran = PixPointsTran(xpix_pts_translated, ypix_pts_translated)
@@ -214,7 +203,7 @@ def translate_pixpts(pixpts_rot, rover_pos):
     return pixpts_tran
 
 
-def rover_to_world(pixpts_rf, rover_pos, rover_yaw):
+def rover_to_world(pixpts_rf, rover_pos, rover_yaw, world_size=200):
     """
     Transform pixel points of ROIs from rover frame to world frame.
 
@@ -222,8 +211,9 @@ def rover_to_world(pixpts_rf, rover_pos, rover_yaw):
     pixpts_rf -- tuple of numpy arrays of x,y pixel points in rover frame
     rover_pos -- tuple of rover x,y position in world frame
     rover_yaw -- rover yaw angle in world frame
+    world_size -- integer length of square world map of 200 x 200 pixels
 
-    Return values:
+    Return value:
     pixpts_wf -- namedtuple of numpy arrays of pixel x,y points in world frame
 
     """
@@ -231,9 +221,9 @@ def rover_to_world(pixpts_rf, rover_pos, rover_yaw):
     pixpts_rot = rotate_pixpts(pixpts_rf, rover_yaw)
     pixpts_tran = translate_pixpts(pixpts_rot, rover_pos)
 
-    # Clip pixels to be within world_size
-    xpix_pts_wf = np.clip(np.int_(pixpts_tran.x), 0, WORLDMAP_HEIGHT - 1)
-    ypix_pts_wf = np.clip(np.int_(pixpts_tran.y), 0, WORLDMAP_HEIGHT - 1)
+    # Clip pixels to be within world size
+    xpix_pts_wf = np.clip(np.int_(pixpts_tran.x), 0, world_size-1)
+    ypix_pts_wf = np.clip(np.int_(pixpts_tran.y), 0, world_size-1)
 
     # Define a named tuple for the points of the three ROIs
     PixPointsWf = namedtuple('PixPointsWf', 'x y')
@@ -242,21 +232,23 @@ def rover_to_world(pixpts_rf, rover_pos, rover_yaw):
     return pixpts_wf
 
 
-def inv_translate_pixpts(pixpts_wf, translation):
+def inv_translate_pixpts(pixpts_wf, translation, scale_factor=10):
     """
     Inverse translate pixel points from world frame.
 
     Keyword arguments:
     pixpts_wf -- namedtuple of numpy arrays of x,y pixel points in world frame
     translation -- tuple of displacements along x,y in world frame
+    scale_factor -- between world and rover frame pixels
 
-    Return values:
+    Return value:
     pixpts_rot -- namedtuple of numpy arrays of pixel x,y points in prior
                   rotated positions
     """
     translation_x, translation_y = translation
-    xpix_pts_rotated = (pixpts_wf.x - translation_x) * SCALE_FACTOR
-    ypix_pts_rotated = (pixpts_wf.y - translation_y) * SCALE_FACTOR
+
+    xpix_pts_rotated = (pixpts_wf.x - translation_x)*scale_factor
+    ypix_pts_rotated = (pixpts_wf.y - translation_y)*scale_factor
 
     PixPointsRot = namedtuple('PixPointsRot', 'x y')
     pixpts_rot = PixPointsRot(xpix_pts_rotated, ypix_pts_rotated)
@@ -272,13 +264,14 @@ def inv_rotate_pixpts(pixpts_rot, angle):
     pixpts_rot -- namedtuple of numpy arrays of x,y pixel points rotated
     angle -- rotation angle in degrees
 
-    Return values:
-    pixpts -- namedtuple of numpy arrays of pixel x,y points in 
+    Return value:
+    pixpts -- namedtuple of numpy arrays of pixel x,y points in
               original positions
     """
-    angle_rad = angle * np.pi / 180  # degrees to radians
-    xpix_pts = pixpts_rot.x * np.cos(angle) + pixpts_rot.y * np.sin(angle)
-    ypix_pts = -pixpts_rot.x * np.sin(angle) + pixpts_rot.y * np.cos(angle)
+    angle = angle*TO_RAD
+
+    xpix_pts = pixpts_rot.x*np.cos(angle) + pixpts_rot.y*np.sin(angle)
+    ypix_pts = -pixpts_rot.x*np.sin(angle) + pixpts_rot.y*np.cos(angle)
 
     PixPoints = namedtuple('PixPoints', 'x y')
     pixpts = PixPoints(xpix_pts, ypix_pts)
@@ -295,18 +288,18 @@ def world_to_rover(pixpts_wf, rover_pos, rover_yaw):
     rover_pos -- tuple of rover x,y position in world frame
     rover_yaw -- rover yaw angle in world frame
 
-    Return values:
+    Return value:
     pixpts_rf -- namedtuple of numpy arrays of pixel x,y points in rover frame
 
     """
     # Apply inverse translation and rotation
     pixpts_rot = inv_translate_pixpts(pixpts_wf, rover_pos)
-    pixpts_rf = inv_rotate_pix(pixpts_rot, rover_yaw)
+    pixpts_rf = inv_rotate_pixpts(pixpts_rot, rover_yaw)
 
     return pixpts_rf
 
 
-def perception_step(Rover):
+def perception_step(Rover, R=0, G=1, B=2):
     """
     Sense environment with rover camera and update rover state accordingly.
 
@@ -321,10 +314,12 @@ def perception_step(Rover):
     # Apply color thresholds to extract pixels of navigable/obstacles/rocks
     thresh_pixpts_pf = color_thresh(warped_img)
 
-    # Update Rover.vision_image (displayed on left side of simulation screen)
-    Rover.vision_image[:, :, 0] = thresh_pixpts_pf.obs*135
-    Rover.vision_image[:, :, 1] = thresh_pixpts_pf.rock
-    Rover.vision_image[:, :, 2] = thresh_pixpts_pf.nav*175
+    # Update rover vision image with each ROI assigned to one of
+    # the RGB color channels (displayed on left side of sim screen)
+    R_VAL, G_VAL, B_VAL = 135, 1, 175
+    Rover.vision_image[:, :, R] = thresh_pixpts_pf.obs * R_VAL
+    Rover.vision_image[:, :, G] = thresh_pixpts_pf.rock * G_VAL
+    Rover.vision_image[:, :, B] = thresh_pixpts_pf.nav * B_VAL
 
     # Transform pixel coordinates from perspective frame to rover frame
     nav_pixpts_rf = perspect_to_rover(thresh_pixpts_pf.nav)
@@ -349,8 +344,9 @@ def perception_step(Rover):
     rock_pixpts_wf = rover_to_world(rock_pixpts_rf, Rover.pos, Rover.yaw)
 
     # Update Rover worldmap (to be displayed on right side of screen)
-    Rover.worldmap[obs_pixpts_wf.y, obs_pixpts_wf.x, 0] += 255
-    Rover.worldmap[rock_pixpts_wf.y, rock_pixpts_wf.x, 1] += 255
-    Rover.worldmap[nav_pixpts_wf.y, nav_pixpts_wf.x, 2] += 255
+    MAX_RGB_VAL = 255
+    Rover.worldmap[obs_pixpts_wf.y, obs_pixpts_wf.x, R] += MAX_RGB_VAL
+    Rover.worldmap[rock_pixpts_wf.y, rock_pixpts_wf.x, G] += MAX_RGB_VAL
+    Rover.worldmap[nav_pixpts_wf.y, nav_pixpts_wf.x, B] += MAX_RGB_VAL
 
     return Rover
