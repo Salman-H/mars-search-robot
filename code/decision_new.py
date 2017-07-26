@@ -28,16 +28,16 @@ class DecisionHandler():
         self.state = {
             0: states.FindWall(),
             1: states.FollowWall(),
-            2: states.AvoidWall(),
-            3: states.TurnToWall(),
-            4: states.GetUnstuck(),
+            2: states.TurnToWall(),
+            3: states.AvoidWall(),
+            4: states.AvoidObstacles(),
             5: states.GoToSample(),
             6: states.Stop(),
             7: states.InitiatePickup(),
             8: states.WaitForPickupInitiate(),
             9: states.WaitForPickupFinish(),
-            10: states.ReturnHome(),
-            11: states.AvoidObstacles(),
+            10: states.GetUnstuck(),
+            11: states.ReturnHome(),
             12: states.Park()
         }
         # define the set of events
@@ -101,16 +101,21 @@ class DecisionHandler():
 
     def following_wall(self, Rover):
         """Handle switching from FollowWall state."""
+        # time in seconds allowed to remain stuck in this state
+        stucktime = 2.0
         if (self.is_event(Rover, 'deviated_from_wall') and
                 self.is_event(Rover, 'left_path_clear')):
-            self.switch_to_state(Rover, self.state[3])  # TurnToWall
+            self.switch_to_state(Rover, self.state[2])  # TurnToWall
 
         elif self.is_event(Rover, 'at_left_obstacle'):
-            self.switch_to_state(Rover, self.state[2])  # AvoidWall
+            self.switch_to_state(Rover, self.state[3])  # AvoidWall
 
         elif (self.is_event(Rover, 'sample_on_left') or
                 self.is_event(Rover, 'sample_right_close')):
             self.switch_to_state(Rover, self.state[5])  # GoToSample
+
+        elif self.is_stuck_for(Rover, stucktime):
+            self.switch_to_state(Rover, self.state[10])  # GetUnstuck
         else:
             self.switch_to_state(Rover, self.curr_state)
 
@@ -123,13 +128,17 @@ class DecisionHandler():
 
     def going_to_sample(self, Rover):
         """Handle switching from GoToSample state."""
+        # time in seconds allowed to remain stuck in this state
+        stucktime = 4.0
         if self.is_event(Rover, 'sample_in_view'):
             if Rover.near_sample:
                 self.switch_to_state(Rover, self.state[6])  # Stop
+            elif self.is_stuck_for(Rover, stucktime):
+                self.switch_to_state(Rover, self.state[10])  # GetUnstuck
             else:
                 self.switch_to_state(Rover, self.curr_state)
 
-    def stopped(self, Rover):
+    def stopped_at_sample(self, Rover):
         """Handle switching from Stop state."""
         if self.is_event(Rover, 'can_pickup'):
             self.switch_to_state(Rover, self.state[7])  # InitiatePickup
@@ -150,7 +159,7 @@ class DecisionHandler():
     def waiting_pickup_finish(self, Rover):
         """Handle switching from WaitForPickupFinish state."""
         if Rover.picking_up == 0:
-            self.switch_to_state(Rover, self.state[2])  # AvoidWall
+            self.switch_to_state(Rover, self.state[3])  # AvoidWall
         else:
             self.switch_to_state(Rover, self.curr_state)
 
@@ -161,7 +170,7 @@ class DecisionHandler():
         stucktime = 2.0  # seconds
         if Rover.vel >= 1.0 or self.is_stuck_for(Rover, stucktime):
             if Rover.going_home:
-                self.switch_to_state(Rover, self.state[10])  # ReturnHome
+                self.switch_to_state(Rover, self.state[11])  # ReturnHome
             else:
                 self.switch_to_state(Rover, self.state[1])  # FollowWall
         else:
@@ -169,10 +178,14 @@ class DecisionHandler():
 
     def returning_home(self, Rover):
         """Handle switching from ReturnHome state."""
+        # time in seconds allowed to remain stuck in this state
+        stucktime = 2.0
         if self.is_event(Rover, 'at_front_obstacle'):
-            self.switch_to_state(Rover, self.state[10])  # ReturnHome
+            self.switch_to_state(Rover, self.state[11])  # ReturnHome
         elif self.is_event(Rover, 'reached_home'):
             self.switch_to_state(Rover, self.state[12])  # Park
+        elif self.is_stuck_for(Rover, stucktime):
+            self.switch_to_state(Rover, self.state[10])  # GetUnstuck
         else:
             self.switch_to_state(Rover, self.curr_state)
 
