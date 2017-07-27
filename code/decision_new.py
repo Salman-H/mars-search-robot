@@ -24,7 +24,7 @@ class DecisionHandler():
 
     def __init__(self):
         """Initialize a DecisionHandler instance."""
-        # define the set of states
+        # Define the set of state identifiers
         self.state = {
             0: states.FindWall(),
             1: states.FollowWall(),
@@ -40,7 +40,7 @@ class DecisionHandler():
             11: states.ReturnHome(),
             12: states.Park()
         }
-        # define the set of events
+        # Define the set of events
         self.event = {
             'velocity_exceeded': events.velocity_exceeded,
             'front_path_clear': events.front_path_clear,
@@ -58,7 +58,8 @@ class DecisionHandler():
             'completed_mission': events.completed_mission,
             'reached_home': events.reached_home
         }
-        self.curr_state = self.state[0]  # default state
+        # Default state
+        self.curr_state = self.state[0]  # FindWall
 
     def is_event(self, Rover, name):
         """Check if given event has occurred."""
@@ -107,6 +108,8 @@ class DecisionHandler():
             Rover.stuck_heading = 0.0
         return exceeded_stucktime
 
+    # STATE HANDLERS:
+
     def finding_wall(self, Rover):
         """Handle switching from FindWall state."""
         if Rover.yaw > 45 and Rover.yaw < 65:
@@ -134,7 +137,7 @@ class DecisionHandler():
 
     def turning_to_wall(self, Rover):
         """Handle switching from TurnToWall state."""
-         if self.is_event(Rover, 'pointed_along_wall'):
+        if self.is_event(Rover, 'pointed_along_wall'):
             self.switch_to_state(Rover, self.state[1])  # FollowWall
         else:
             self.switch_to_state(Rover, self.curr_state)
@@ -146,7 +149,7 @@ class DecisionHandler():
         else:
             self.switch_to_state(Rover, self.curr_state)
 
-    def avoid_obstacles(self, Rover):
+    def avoiding_obstacles(self, Rover):
         """Handle switching from AvoidObstacles state."""
         if self.both_events(Rover, 'front_path_clear', 'pointed_at_nav'):
             self.switch_to_state(Rover, self.state[11])  # ReturnHome
@@ -221,5 +224,27 @@ class DecisionHandler():
         self.switch_to_state(Rover, self.state[12])  # Remain in Park
 
     def execute(self, Rover):
-        """Select and execute the current state action."""
-        pass
+        """Select the state handler depending on the curr state."""
+        # Ensure Rover telemetry data is coming in
+        if Rover.nav_angles is not None:
+            # State identifiers and corresponding handlers
+            select = {
+                self.state[0]: self.finding_wall,
+                self.state[1]: self.following_wall,
+                self.state[2]: self.turning_to_wall,
+                self.state[3]: self.avoiding_wall,
+                self.state[4]: self.avoiding_obstacles,
+                self.state[5]: self.going_to_sample,
+                self.state[6]: self.stopped_at_sample,
+                self.state[7]: self.initiating_pickup,
+                self.state[8]: self.waiting_pickup_initiate,
+                self.state[9]: self.waiting_pickup_finish,
+                self.state[10]: self.getting_unstuck,
+                self.state[11]: self.returning_home
+                self.state[12]: self.parking
+            }
+            # Select the handler depending on the curr state
+            func = select.get(self.curr_state, lambda: "nothing")
+            # Call the handler
+            func(Rover)
+        return Rover
