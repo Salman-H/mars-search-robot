@@ -10,6 +10,7 @@ __author__ = 'Salman Hashmi, Ryan Keenan, Curt Welch'
 __license__ = 'BSD License'
 
 
+# Standard library imports
 import os
 import time
 import json
@@ -20,6 +21,7 @@ import argparse
 from datetime import datetime
 from io import BytesIO, StringIO
 
+# Related third party imports
 import cv2
 import socketio
 import eventlet
@@ -29,9 +31,9 @@ import matplotlib.image as mpimg
 from PIL import Image
 from flask import Flask
 
-
+# Local application/library specific imports
 from perception import perception_step
-from decision import decision_step
+import decision_new
 from supporting_functions import update_rover, create_output_images
 
 # Initialize socketio server and Flask application
@@ -92,7 +94,7 @@ class RoverTelemetry():
 
         self.samples_pos = None  # To store the actual sample positions
         self.samples_to_find = 0  # To store the initial count of samples
-        self.samples_found = 0  # To count the number of samples found
+        self.samples_collected = 0 # To count the number of samples collected
         self.near_sample = 0  # To be set to TLM value data["near_sample"]
         self.picking_up = 0  # To be set to TLM value data["picking_up"]
         self.send_pickup = False  # Set to True to trigger rock pickup
@@ -120,6 +122,9 @@ class RoverTelemetry():
 
 # Initialize our rover
 Rover = RoverTelemetry()
+
+# Initialize decision maker
+Decider = decision_new.DecisionHandler()
 
 # Variables to track frames per second (FPS)
 # Initialize frame counter
@@ -158,7 +163,7 @@ def telemetry(sid, data):
 
             # Execute perception and decision steps to update Rover's telemetry
             Rover = perception_step(Rover)
-            Rover = decision_step(Rover)
+            Rover = Decider.execute(Rover)
 
             # Create output images to send to server
             out_image_string1, out_image_string2 = create_output_images(Rover)
