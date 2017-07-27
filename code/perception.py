@@ -1,21 +1,21 @@
 """
 Module for rover perception.
 
-Contains functions for processing rover's front camera video frames
+Contains functions for processing rover's front camera image frames
 and updating rover state.
 
-Turns rover camera 3D images into a 2D perspective world-view of the
-rover environment identifying regions of interests and superimposes
-this view on the ground truth worldmap.
+Objective:
+Turn rover camera 3D images into a 2D perspective world-view of the
+rover environment that identifies regions of interests (ROIs), and
+superimpose this view on the ground truth worldmap.
 
 
-NOTE:
+NOTE Perception units:
 
-Perception units:
-
-angle/yaw/heading -- degrees
-velocity -- meters/second
 distance -- meters
+velocity -- meters/second
+angle, heading -- degrees
+yaw, pitch, roll -- degrees
 
 """
 
@@ -366,11 +366,14 @@ def perception_step(Rover, R=0, G=1, B=2):
     obs_pixpts_wf = rover_to_world(obs_pixpts_rf, Rover.pos, Rover.yaw)
     rock_pixpts_wf = rover_to_world(rock_pixpts_rf, Rover.pos, Rover.yaw)
 
-    # Update rover worldmap with each ROI assigned to one of
-    # the RGB color channels (displayed on right side of sim screen)
+    # Only update worldmap if rover is not pitching or rolling too much
+    # High pitch/rolls cause inaccurate world mapping and low fidelity
     MAX_RGB_VAL = 255
-    Rover.worldmap[obs_pixpts_wf.y, obs_pixpts_wf.x, R] += MAX_RGB_VAL
-    Rover.worldmap[rock_pixpts_wf.y, rock_pixpts_wf.x, G] += MAX_RGB_VAL
-    Rover.worldmap[nav_pixpts_wf.y, nav_pixpts_wf.x, B] += MAX_RGB_VAL
+    if (359 < Rover.pitch < 0.25) and (359 < Rover.roll < 0.37):
+        # Update rover worldmap with each ROI assigned to one of
+        # the RGB color channels (displayed on right side of sim screen)
+        Rover.worldmap[obs_pixpts_wf.y, obs_pixpts_wf.x, R] += MAX_RGB_VAL
+        Rover.worldmap[rock_pixpts_wf.y, rock_pixpts_wf.x, G] += MAX_RGB_VAL
+        Rover.worldmap[nav_pixpts_wf.y, nav_pixpts_wf.x, B] += MAX_RGB_VAL
 
     return Rover
