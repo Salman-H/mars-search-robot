@@ -2,7 +2,20 @@
 Module for rover perception.
 
 Contains functions for processing rover's front camera video frames
-and updating rover state
+and updating rover state.
+
+Turns rover camera 3D images into a 2D perspective world-view of the
+rover environment identifying regions of interests and superimposes
+this view on the ground truth worldmap.
+
+
+NOTE:
+
+Perception units:
+
+angle/yaw/heading -- degrees
+velocity -- meters/second
+distance -- meters
 
 """
 
@@ -14,8 +27,6 @@ from collections import namedtuple
 
 import numpy as np
 import cv2
-
-from constants import TO_DEG, TO_RAD
 
 
 def color_thresh(input_img, rgb_thresh=(160, 160, 160),
@@ -147,12 +158,22 @@ def perspect_to_rover(binary_img):
 
 
 def to_polar_coords(pixpts):
-    """Convert cartesian coordinates of pixels to polar coordinates."""
-    # Compute distances and angles of each pixel from rover
-    dists_to_pixpts = np.sqrt(pixpts.x**2 + pixpts.y**2)
-    angles_to_pixpts = np.arctan2(pixpts.y, pixpts.x)
+    """
+    Convert cartesian coordinates of pixels to polar coordinates.
 
-    return dists_to_pixpts, angles_to_pixpts
+    Keyword arguments:
+    pixpts -- namedtuple of numpy arrays of pixel x,y points
+
+    Return value:
+    dists, angles -- distance(m) and angles(deg) to pixpts
+
+    """
+    rad2deg = 180./np.pi
+
+    dists = np.sqrt(pixpts.x**2 + pixpts.y**2)
+    angles = np.arctan2(pixpts.y, pixpts.x)*rad2deg
+
+    return dists, angles
 
 
 def rotate_pixpts(pixpts, angle):
@@ -167,11 +188,12 @@ def rotate_pixpts(pixpts, angle):
     pixpts_rot -- namedtuple of numpy arrays of pixel x,y points rotated
 
     """
-    angle = angle*TO_RAD
+    deg2rad = np.pi/180.
+    angle_rad = angle*deg2rad
     xpix_pts, ypix_pts = pixpts
 
-    xpix_pts_rotated = xpix_pts*np.cos(angle) - ypix_pts*np.sin(angle)
-    ypix_pts_rotated = xpix_pts*np.sin(angle) + ypix_pts*np.cos(angle)
+    xpix_pts_rotated = xpix_pts*np.cos(angle_rad) - ypix_pts*np.sin(angle_rad)
+    ypix_pts_rotated = xpix_pts*np.sin(angle_rad) + ypix_pts*np.cos(angle_rad)
 
     PixPointsRot = namedtuple('PixPointsRot', 'x y')
     pixpts_rot = PixPointsRot(xpix_pts_rotated, ypix_pts_rotated)
@@ -268,10 +290,11 @@ def inv_rotate_pixpts(pixpts_rot, angle):
     pixpts -- namedtuple of numpy arrays of pixel x,y points in
               original positions
     """
-    angle = angle*TO_RAD
+    deg2rad = np.pi/180.
+    angle_rad = angle*deg2rad
 
-    xpix_pts = pixpts_rot.x*np.cos(angle) + pixpts_rot.y*np.sin(angle)
-    ypix_pts = -pixpts_rot.x*np.sin(angle) + pixpts_rot.y*np.cos(angle)
+    xpix_pts = pixpts_rot.x*np.cos(angle_rad) + pixpts_rot.y*np.sin(angle_rad)
+    ypix_pts = -pixpts_rot.x*np.sin(angle_rad) + pixpts_rot.y*np.cos(angle_rad)
 
     PixPoints = namedtuple('PixPoints', 'x y')
     pixpts = PixPoints(xpix_pts, ypix_pts)
@@ -303,9 +326,9 @@ def perception_step(Rover, R=0, G=1, B=2):
     """
     Sense environment with rover camera and update rover state accordingly.
 
-    Turns rover camera 3D images into a 2D perspective world-view of the
-    rover environment identifying regions of interests and superimposes
-    this view on the ground truth worldmap
+    Keyword arguments:
+    Rover -- instance of RoverTelemetry class
+    R,G,B -- indexes representing the RGB color channels in a numpy image
 
     """
     # Apply perspective transform to get 2D overhead view of rover cam
@@ -315,7 +338,7 @@ def perception_step(Rover, R=0, G=1, B=2):
     thresh_pixpts_pf = color_thresh(warped_img)
 
     # Update rover vision image with each ROI assigned to one of
-    # the RGB color channels (displayed on left side of sim screen)
+    # the RGB color channels (to be displayed on left side of sim screen)
     R_VAL, G_VAL, B_VAL = 135, 1, 175
     Rover.vision_image[:, :, R] = thresh_pixpts_pf.obs * R_VAL
     Rover.vision_image[:, :, G] = thresh_pixpts_pf.rock * G_VAL
@@ -343,7 +366,8 @@ def perception_step(Rover, R=0, G=1, B=2):
     obs_pixpts_wf = rover_to_world(obs_pixpts_rf, Rover.pos, Rover.yaw)
     rock_pixpts_wf = rover_to_world(rock_pixpts_rf, Rover.pos, Rover.yaw)
 
-    # Update Rover worldmap (to be displayed on right side of screen)
+    # Update rover worldmap with each ROI assigned to one of
+    # the RGB color channels (displayed on right side of sim screen)
     MAX_RGB_VAL = 255
     Rover.worldmap[obs_pixpts_wf.y, obs_pixpts_wf.x, R] += MAX_RGB_VAL
     Rover.worldmap[rock_pixpts_wf.y, rock_pixpts_wf.x, G] += MAX_RGB_VAL

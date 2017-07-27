@@ -2,9 +2,12 @@
 Functions for listening to events in the rover environment.
 
 NOTE:
-- angles are in degrees
-- distances are in meters
-- speeds are in meters/second
+
+Perception units:
+
+angle/yaw/heading -- degrees
+velocity -- meters/second
+distance -- meters
 
 """
 
@@ -13,8 +16,6 @@ __license__ = 'BSD License'
 
 
 import numpy as np
-
-from constants import TO_DEG
 
 
 def velocity_exceeded(Rover, max_vel=2.0):
@@ -56,7 +57,7 @@ def pointed_at_nav(Rover, angle_limit=17):
     Keyword arguments:
     angle_limit -- angle range limit for nav angles (degrees)
     """
-    nav_heading = np.mean(Rover.nav_angles)*TO_DEG
+    nav_heading = np.mean(Rover.nav_angles)
     return -angle_limit <= nav_heading <= angle_limit
 
 
@@ -69,7 +70,7 @@ def pointed_along_wall(Rover, safe_pixs=500, wall_angle_bias=-10):
     wall_angle_bias -- to bias rover heading for pointing along wall (degrees)
     """
     nav_pixs_left = len(Rover.nav_angles_left)
-    nav_heading_left = np.mean(Rover.nav_angles_left)*TO_DEG + wall_angle_bias
+    nav_heading_left = np.mean(Rover.nav_angles_left) + wall_angle_bias
 
     return (nav_pixs_left >= safe_pixs
             and nav_heading_left > 0)
@@ -82,7 +83,7 @@ def deviated_from_wall(Rover, max_angle_wall=25):
     Keyword arguments:
     max_angle_wall --  maximum allowed angle from left wall (degrees)
     """
-    nav_heading_left = np.mean(Rover.nav_angles_left)*TO_DEG
+    nav_heading_left = np.mean(Rover.nav_angles_left)
     return nav_heading_left > max_angle_wall
 
 
@@ -114,7 +115,7 @@ def sample_on_left(Rover, min_left_angle=0.0):
     Keyword arguments:
     min_left_angle -- only rocks to the left/above this are considered
     """
-    rock_heading = np.mean(Rover.rock_angles)*TO_DEG
+    rock_heading = np.mean(Rover.rock_angles)
     return rock_heading >= min_left_angle
 
 
@@ -126,7 +127,7 @@ def sample_right_close(Rover, rock_dist_limit=75, max_right_angle=17):
     rock_dist_limit -- only rocks below this limit are considered
     max_right_angle -- only rocks to left/above of this are considered
     """
-    rock_heading = np.mean(Rover.rock_angles)*TO_DEG
+    rock_heading = np.mean(Rover.rock_angles)
     rock_distance = np.mean(Rover.rock_dists)
 
     return (rock_heading > -max_right_angle
@@ -146,7 +147,7 @@ def pointed_at_sample(Rover, angle_limit=17):
     Keyword arguments:
     angle_limit -- angle range limit for rock angles (radians)
     """
-    rock_heading = np.mean(Rover.rock_angles)*TO_DEG
+    rock_heading = np.mean(Rover.rock_angles)
     return -angle_limit < rock_heading < angle_limit
 
 
