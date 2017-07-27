@@ -146,6 +146,13 @@ class DecisionHandler():
         else:
             self.switch_to_state(Rover, self.curr_state)
 
+    def avoid_obstacles(self, Rover):
+        """Handle switching from AvoidObstacles state."""
+        if self.both_events(Rover, 'front_path_clear', 'pointed_at_nav'):
+            self.switch_to_state(Rover, self.state[11])  # ReturnHome
+        else:
+            self.switch_to_state(Rover, self.curr_state)
+
     def going_to_sample(self, Rover):
         """Handle switching from GoToSample state."""
         # time in seconds allowed to remain stuck in this state
