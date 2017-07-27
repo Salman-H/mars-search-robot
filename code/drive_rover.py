@@ -62,7 +62,12 @@ class RoverTelemetry():
     """
 
     def __init__(self):
-        """Initialize a RoverTelemetry instance to retain parameters."""
+        """
+        Initialize a RoverTelemetry instance to retain parameters.
+
+        NOTE: distances in meters and angles in degrees
+
+        """
         self.start_time = None  # To record the start time of navigation
         self.total_time = None  # To record total duration of navigation
         self.img = None  # Current camera image
@@ -70,7 +75,7 @@ class RoverTelemetry():
         self.yaw = None  # Current yaw angle
         self.pitch = None  # Current pitch angle
         self.roll = None  # Current roll angle
-        self.vel = None  # Current velocity
+        self.vel = None  # Current velocity (m/s)
         self.steer = 0  # Current steering angle
         self.throttle = 0  # Current throttle value
         self.brake = 0  # Current brake value
@@ -84,16 +89,6 @@ class RoverTelemetry():
 
         self.rock_dists = None  # Distances to rock terrain pixels
         self.rock_angles = None  # Angles of rock terrain pixels
-        self.curr_rock_angle = None  # Angle of rock currently pursued
-
-        self.ground_truth = ground_truth_3d  # Ground truth worldmap
-        self.mode = 'forward'  # Current mode (can be forward or stop)
-        self.throttle_set = 0.2  # Throttle setting when accelerating
-        self.brake_set = 10  # Brake setting when braking
-
-        self.stop_forward = 50  # Threshold to initiate stopping
-        self.go_forward = 500  # Threshold to go forward again
-        self.max_vel = 2  # Maximum velocity (meters/second)
 
         self.samples_pos = None  # To store the actual sample positions
         self.samples_to_find = 0  # To store the initial count of samples
@@ -104,7 +99,7 @@ class RoverTelemetry():
 
         self.home_distance = None  # Current distance to starting location
         self.home_heading = None  # Current heading to starting location
-        self.returning_home = False  # Default rover configuration
+        self.going_home = False  # Default rover configuration
 
         self.timer_on = False  # Timer to determine duration of stuck
         self.stuck_heading = 0.0  # Heading at the time of getting stuck
@@ -118,6 +113,7 @@ class RoverTelemetry():
         # Update this image with the positions of navigable terrain
         # obstacles and rock samples
         self.worldmap = np.zeros((200, 200, 3), dtype=np.float)
+        self.ground_truth = ground_truth_3d  # Ground truth worldmap
         # To update % of ground truth map successfully found
         self.perc_mapped = 0
 
