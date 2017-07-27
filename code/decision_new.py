@@ -132,6 +132,13 @@ class DecisionHandler():
         else:
             self.switch_to_state(Rover, self.curr_state)
 
+    def turning_to_wall(self, Rover):
+        """Handle switching from TurnToWall state."""
+         if self.is_event(Rover, 'pointed_along_wall'):
+            self.switch_to_state(Rover, self.state[1])  # FollowWall
+        else:
+            self.switch_to_state(Rover, self.curr_state)
+
     def avoiding_wall(self, Rover):
         """Handle switching from AvoidWall state."""
         if self.is_event(Rover, 'pointed_along_wall'):
