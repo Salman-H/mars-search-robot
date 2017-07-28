@@ -2,12 +2,11 @@
 Functions for listening to events in the rover environment.
 
 NOTE:
-
-Perception units:
-
-angle/yaw/heading -- degrees
-velocity -- meters/second
+time -- seconds
 distance -- meters
+velocity -- meters/second
+angle, heading -- degrees
+yaw, pitch, roll -- degrees
 
 """
 
@@ -105,18 +104,24 @@ def at_left_obstacle(Rover, safe_pixs=50):
     Keyword arguments:
     safe_pixs -- minimum number of pixels to keep from left obstacles
     """
+
     nav_pixs_left = len(Rover.nav_angles_left)
     return nav_pixs_left < safe_pixs
 
 
-def sample_on_left(Rover, min_left_angle=0.0):
+def sample_on_left(Rover, rock_dist_limit=73, min_left_angle=0.0):
     """Check if a sample is spotted on the left.
 
     Keyword arguments:
-    min_left_angle -- only rocks to the left/above this are considered
+    rock_dist_limit -- rocks only detected when under this dist from rover
+    min_left_angle -- rocks only detected when left of this angle from rover
     """
+
     rock_heading = np.mean(Rover.rock_angles)
-    return rock_heading >= min_left_angle
+    rock_distance = np.mean(Rover.rock_dists)
+
+    return (rock_heading >= min_left_angle
+            and rock_distance < rock_dist_limit)
 
 
 def sample_right_close(Rover, rock_dist_limit=75, max_right_angle=17):
@@ -124,9 +129,10 @@ def sample_right_close(Rover, rock_dist_limit=75, max_right_angle=17):
     Check if a nearby sample is spotted on the right.
 
     Keyword arguments:
-    rock_dist_limit -- only rocks below this limit are considered
+    rock_dist_limit -- rocks only detected when under this limit
     max_right_angle -- only rocks to left/above of this are considered
     """
+
     rock_heading = np.mean(Rover.rock_angles)
     rock_distance = np.mean(Rover.rock_dists)
 
@@ -156,13 +162,13 @@ def can_pickup_sample(Rover):
     return Rover.near_sample and Rover.vel <= 0.1
 
 
-def completed_mission(Rover, min_samples=6, min_mapped=95, max_time=700):
+def completed_mission(Rover, min_samples=6, min_mapped=95, max_time=110):
     """Check if rover has completed mission criteria."""
-    return (Rover.samples_found >= min_samples
+    return (Rover.samples_collected >= min_samples
             and Rover.perc_mapped >= min_mapped
             ) or Rover.total_time >= max_time
 
 
 def reached_home(Rover, max_dist=5):
     """Check if rover has reached home after completing mission."""
-    return Rover.going_home and Rover.distance_to_home < max_dist
+    return Rover.going_home and Rover.home_distance < max_dist
