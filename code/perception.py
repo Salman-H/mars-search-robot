@@ -9,9 +9,8 @@ Turn rover camera 3D images into a 2D perspective world-view of the
 rover environment that identifies regions of interests (ROIs), and
 superimpose this view on the ground truth worldmap.
 
-
-NOTE Perception units:
-
+NOTE:
+time -- seconds
 distance -- meters
 velocity -- meters/second
 angle, heading -- degrees
@@ -94,7 +93,7 @@ def perspect_transform(src_img, dst_grid=10, bottom_offset=6):
 
     """
     # Dimension of source image from rover camera
-    height, width = src_img.shape
+    height, width = src_img.shape[0], src_img.shape[1]
 
     # Numpy array of four source points defining a grid on input 3D image
     # acquired from calibration data in test notebook
@@ -139,7 +138,7 @@ def perspect_to_rover(binary_img):
 
     """
     # Dimension of input image
-    height, width = binary_img.shape
+    height, width = binary_img.shape[0], binary_img.shape[1]
 
     # Identify all nonzero pixel coords in the binary image
     ypix_pts_pf, xpix_pts_pf = binary_img.nonzero()
@@ -201,23 +200,23 @@ def rotate_pixpts(pixpts, angle):
     return pixpts_rot
 
 
-def translate_pixpts(pixpts_rot, rover_pos, scale_factor=10):
+def translate_pixpts(pixpts_rot, translation, scale_factor=10):
     """
     Geometrically translate rotated pixel points by rover position.
 
     Keyword arguments:
     pixpts_rot -- namedtuple of numpy arrays of pixel x,y points rotated
-    rover_pos -- tuple of rover x,y position in world frame
+    translation -- tuple of displacements along x,y in world frame
     scale_factor -- between world and rover frame pixels
 
     Return value:
     pixpts_tran -- namedtuple of numpy arrays of pixel x,y points translated
 
     """
-    rover_x, rover_y = rover_pos
+    translation_x, translation_y = translation
 
-    xpix_pts_translated = pixpts_rot.x/scale_factor + rover_x
-    ypix_pts_translated = pixpts_rot.y/scale_factor + rover_y
+    xpix_pts_translated = pixpts_rot.x/scale_factor + translation_x
+    ypix_pts_translated = pixpts_rot.y/scale_factor + translation_y
 
     PixPointsTran = namedtuple('PixPointsTran', 'x y')
     pixpts_tran = PixPointsTran(xpix_pts_translated, ypix_pts_translated)
@@ -259,7 +258,7 @@ def inv_translate_pixpts(pixpts_wf, translation, scale_factor=10):
     Inverse translate pixel points from world frame.
 
     Keyword arguments:
-    pixpts_wf -- namedtuple of numpy arrays of x,y pixel points in world frame
+    pixpts_wf -- tuple of numpy arrays of x,y pixel points in world frame
     translation -- tuple of displacements along x,y in world frame
     scale_factor -- between world and rover frame pixels
 
@@ -268,9 +267,10 @@ def inv_translate_pixpts(pixpts_wf, translation, scale_factor=10):
                   rotated positions
     """
     translation_x, translation_y = translation
+    xpix_pts_wf, ypix_pts_wf = pixpts_wf
 
-    xpix_pts_rotated = (pixpts_wf.x - translation_x)*scale_factor
-    ypix_pts_rotated = (pixpts_wf.y - translation_y)*scale_factor
+    xpix_pts_rotated = (xpix_pts_wf - translation_x)*scale_factor
+    ypix_pts_rotated = (ypix_pts_wf - translation_y)*scale_factor
 
     PixPointsRot = namedtuple('PixPointsRot', 'x y')
     pixpts_rot = PixPointsRot(xpix_pts_rotated, ypix_pts_rotated)
@@ -339,10 +339,10 @@ def perception_step(Rover, R=0, G=1, B=2):
 
     # Update rover vision image with each ROI assigned to one of
     # the RGB color channels (to be displayed on left side of sim screen)
-    R_VAL, G_VAL, B_VAL = 135, 1, 175
-    Rover.vision_image[:, :, R] = thresh_pixpts_pf.obs * R_VAL
-    Rover.vision_image[:, :, G] = thresh_pixpts_pf.rock * G_VAL
-    Rover.vision_image[:, :, B] = thresh_pixpts_pf.nav * B_VAL
+    VISION_R_VAL, VISION_G_VAL, VISION_B_VAL = 135, 1, 175
+    Rover.vision_image[:, :, R] = thresh_pixpts_pf.obs * VISION_R_VAL
+    Rover.vision_image[:, :, G] = thresh_pixpts_pf.rock * VISION_G_VAL
+    Rover.vision_image[:, :, B] = thresh_pixpts_pf.nav * VISION_B_VAL
 
     # Transform pixel coordinates from perspective frame to rover frame
     nav_pixpts_rf = perspect_to_rover(thresh_pixpts_pf.nav)
@@ -353,6 +353,7 @@ def perception_step(Rover, R=0, G=1, B=2):
     Rover.nav_dists, Rover.nav_angles = to_polar_coords(nav_pixpts_rf)
     Rover.obs_dists, Rover.obs_angles = to_polar_coords(obs_pixpts_rf)
     Rover.rock_dists, Rover.rock_angles = to_polar_coords(rock_pixpts_rf)
+
     # Extract subset of nav_angles that are left of rover heading
     Rover.nav_angles_left = Rover.nav_angles[Rover.nav_angles > 0]
 
@@ -366,14 +367,15 @@ def perception_step(Rover, R=0, G=1, B=2):
     obs_pixpts_wf = rover_to_world(obs_pixpts_rf, Rover.pos, Rover.yaw)
     rock_pixpts_wf = rover_to_world(rock_pixpts_rf, Rover.pos, Rover.yaw)
 
-    # Only update worldmap if rover is not pitching or rolling too much
-    # High pitch/rolls cause inaccurate world mapping and low fidelity
-    MAX_RGB_VAL = 255
-    if (359 < Rover.pitch < 0.25) and (359 < Rover.roll < 0.37):
-        # Update rover worldmap with each ROI assigned to one of
-        # the RGB color channels (displayed on right side of sim screen)
-        Rover.worldmap[obs_pixpts_wf.y, obs_pixpts_wf.x, R] += MAX_RGB_VAL
-        Rover.worldmap[rock_pixpts_wf.y, rock_pixpts_wf.x, G] += MAX_RGB_VAL
-        Rover.worldmap[nav_pixpts_wf.y, nav_pixpts_wf.x, B] += MAX_RGB_VAL
+    # Only update worldmap (displayed on right) if rover has a stable drive
+    # High pitch/rolls cause inaccurate 3D to 2D mapping and low fidelity
+    is_stable = ((Rover.pitch > 359 or Rover.pitch < 0.25)
+                 and (Rover.roll > 359 or Rover.roll < 0.37))
+
+    if is_stable:  # Update map with each ROI assigned to an RGB color channel
+        MAP_R_VAL, MAP_G_VAL, MAP_B_VAL = 255, 255, 255
+        Rover.worldmap[obs_pixpts_wf.y, obs_pixpts_wf.x, R] += MAP_R_VAL
+        Rover.worldmap[rock_pixpts_wf.y, rock_pixpts_wf.x, G] += MAP_G_VAL
+        Rover.worldmap[nav_pixpts_wf.y, nav_pixpts_wf.x, B] += MAP_B_VAL
 
     return Rover
