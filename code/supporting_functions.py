@@ -1,4 +1,10 @@
-"""Helper functions for drive_rover module."""
+"""
+Helper functions for drive_rover module.
+
+Used to update rover state as well as rover vision
+and worldmap images on simulation screen
+
+"""
 
 __author__ = 'Salman Hashmi, Ryan Keenan'
 __license__ = 'BSD License'
@@ -44,11 +50,11 @@ def update_rover(Rover, data):
         Rover.samples_pos = (samples_xpos, samples_ypos)
         Rover.samples_to_find = np.int(data["sample_count"])
 
-        # Or just update elapsed time
-        else:
-            tot_time = time.time() - Rover.start_time
-            if np.isfinite(tot_time):
-                Rover.total_time = tot_time
+    # Or just update elapsed time
+    else:
+        tot_time = time.time() - Rover.start_time
+        if np.isfinite(tot_time):
+            Rover.total_time = tot_time
 
     # Print out the fields in the telemetry data dictionary
     print(data.keys())
@@ -97,7 +103,7 @@ def update_rover(Rover, data):
     return Rover, image
 
 
-def create_output_images(Rover):
+def create_output_images(Rover, Decider):
     """Create display output given worldmap results."""
     # Create a scaled map for plotting and clean up obs/nav pixels a bit
     if np.max(Rover.worldmap[:, :, 2]) > 0:
@@ -173,24 +179,79 @@ def create_output_images(Rover):
 
     # Flip the map for plotting so that the y-axis points upward in the display
     map_add = np.flipud(map_add).astype(np.float32)
+
+    # NOTE: For more information, refer to OpenCV docs for putText function:
+    #       http://docs.opencv.org/2.4/modules/core/doc/drawing_functions.html
+
     # Add some text about map and rock sample detection results
-    cv2.putText(map_add, "Time: "+str(np.round(Rover.total_time, 1))+' s',
-                (0, 10), cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, "Time: ",
+                (2, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, ""+str(np.round(Rover.total_time, 1))+' s',
+                (39, 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 0), 1)
 
-    cv2.putText(map_add, "Mapped: "+str(Rover.perc_mapped)+'%',
-                (0, 25), cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, "Mapped: ",
+                (2, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, ""+str(Rover.perc_mapped)+'%',
+                (57, 25), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 0), 1)
 
-    cv2.putText(map_add, "Fidelity: "+str(fidelity)+'%',
-                (0, 40), cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, "Fidelity: ",
+                (2, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, ""+str(fidelity)+'%',
+                (54, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 0), 1)
 
     cv2.putText(map_add, "Rocks",
-                (0, 55), cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+                (2, 55), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
 
-    cv2.putText(map_add, "  Located: "+str(samples_located),
-                (0, 70), cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, " Located: ",
+                (10, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, ""+str(samples_located),
+                (74, 70), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 0), 1)
 
-    cv2.putText(map_add, "  Collected: "+str(Rover.samples_collected),
-                (0, 85), cv2.FONT_HERSHEY_COMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, " Collected: ",
+                (10, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+    cv2.putText(map_add, ""+str(Rover.samples_collected),
+                (80, 85), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 0), 1)
+
+    # Add information about ReturnHome state on map display
+    if Rover.going_home:
+        cv2.putText(map_add, "Going Home:",
+                    (2, 145),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.37, (255, 255, 0), 1)
+
+        cv2.putText(map_add, "distance: ",
+                    (3, 160),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1)
+        cv2.putText(map_add, ""+str(np.round(Rover.home_distance, 1)),
+                    (55, 160),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 0), 1)
+
+        cv2.putText(map_add, "heading: ",
+                    (3, 175),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.32, (255, 255, 255), 1)
+        cv2.putText(map_add, ""+str(np.round(Rover.home_heading, 1)),
+                    (55, 175),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 0), 1)
+    else:
+        cv2.putText(map_add, "Mission:",
+                    (2, 135),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.37, (255, 255, 255), 1)
+
+        cv2.putText(map_add, "In Progress",
+                    (10, 150),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 0), 1)
+
+    # Add state information on rover vision display
+    cv2.putText(Rover.vision_image, "> ",
+                (5, 20), cv2.FONT_HERSHEY_COMPLEX, 0.53, (55, 255, 17), 2)
+
+    cv2.putText(Rover.vision_image, "State:",
+                (23, 20), cv2.FONT_HERSHEY_COMPLEX, 0.65, (55, 255, 17), 1)
+
+    cv2.putText(Rover.vision_image, "_ "+Decider.curr_state.NAME.lower(),
+                (97, 20), cv2.FONT_HERSHEY_COMPLEX, 0.65, (55, 255, 17), 1)
+
+    cv2.putText(Rover.vision_image, "Robot Vision",
+                (5, 151), cv2.FONT_HERSHEY_COMPLEX, 0.53, (255, 255, 255), 1)
 
     # Convert map and vision image to base64 strings for sending to server
     pil_img = Image.fromarray(map_add.astype(np.uint8))
