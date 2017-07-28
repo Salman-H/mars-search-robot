@@ -1,8 +1,8 @@
 """
-Module for supervising rover tasks.
+Main module for Mars Search Robot.
 
-Supervise rover core tasks of perception, decision-making,
-and actuation.
+Gets rover telemetry data and supervises core tasks of
+autonomous navigation and mapping
 
 """
 
@@ -94,7 +94,7 @@ class RoverTelemetry():
 
         self.samples_pos = None  # To store the actual sample positions
         self.samples_to_find = 0  # To store the initial count of samples
-        self.samples_collected = 0 # To count the number of samples collected
+        self.samples_collected = 0  # To count the number of samples collected
         self.near_sample = 0  # To be set to TLM value data["near_sample"]
         self.picking_up = 0  # To be set to TLM value data["picking_up"]
         self.send_pickup = False  # Set to True to trigger rock pickup
@@ -106,14 +106,12 @@ class RoverTelemetry():
         self.timer_on = False  # Timer to determine duration of stuck
         self.stuck_heading = 0.0  # Heading at the time of getting stuck
 
-        # Image output from perception step
-        # Update this image to display your intermediate analysis steps
-        # on screen in autonomous mode
+        # Rover vision image to be updated with displays of
+        # intermediate analysis steps on screen in autonomous mode
         self.vision_image = np.zeros((160, 320, 3), dtype=np.float)
 
-        # Worldmap
-        # Update this image with the positions of navigable terrain
-        # obstacles and rock samples
+        # Worldmap image to be updated with the positions of
+        # ROIs navigable terrain, obstacles and rock samples
         self.worldmap = np.zeros((200, 200, 3), dtype=np.float)
         self.ground_truth = ground_truth_3d  # Ground truth worldmap
         # To update % of ground truth map successfully found
@@ -123,8 +121,8 @@ class RoverTelemetry():
 # Initialize our rover
 Rover = RoverTelemetry()
 
-# Initialize decision maker
-Decider = decision_new.DecisionHandler()
+# Initialize decision supervisor
+Decider = decision_new.DecisionSupervisor()
 
 # Variables to track frames per second (FPS)
 # Initialize frame counter
@@ -166,7 +164,8 @@ def telemetry(sid, data):
             Rover = Decider.execute(Rover)
 
             # Create output images to send to server
-            out_image_string1, out_image_string2 = create_output_images(Rover)
+            out_image_strings = create_output_images(Rover, Decider)
+            out_image_string1, out_image_string2 = out_image_strings
 
             # The action step!  Send commands to the rover!
 
