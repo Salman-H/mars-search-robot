@@ -1,20 +1,19 @@
 """
-Module for rover states.
+Module for rover state actuation.
 
 NOTE:
 
 Perception units:
-
-angle/yaw/heading -- degrees
-velocity -- meters/second
+time -- seconds
 distance -- meters
-
+velocity -- meters/second
+angle, heading -- degrees
+yaw, pitch, roll -- degrees
 
 Actuation magnitude ranges:
-
-steer/yaw -- [-15 to 15]
-throttle -- [-5 to 5]
 brake -- [0 to 10]
+throttle -- [-5 to 5]
+steer/yaw -- [-15 to 15]
 
 """
 
@@ -49,19 +48,21 @@ class FollowWall():
         """
         Initialize a FollowWall instance.
 
-        NOTE: Making wall angle offset more negative will cause
+        NOTE: Making wall angle offset less negative will cause
               sharper left turns and more frequent encounters with wall
         """
+        self.MAX_VEL = 2.0
         self.YAW_LEFT_SET = 15
         self.YAW_RIGHT_SET = -15
         self.THROTTLE_SET = 0.8
-        self.WALL_ANGLE_OFFSET = -9.17
+        self.WALL_ANGLE_OFFSET = -9.9
         self.NAME = 'Follow Wall'
 
     def execute(self, Rover):
         """Execute the FollowWall state action."""
+
         # Add negative bias to nav angles left of rover to follow wall
-        wall_heading = Rover.nav_angles_left + self.WALL_ANGLE_OFFSET
+        wall_heading = np.mean(Rover.nav_angles_left) + self.WALL_ANGLE_OFFSET
         # Drive below max velocity
         if Rover.vel < self.MAX_VEL:
             Rover.throttle = self.THROTTLE_SET
@@ -78,7 +79,7 @@ class TurnToWall():
 
     def __init__(self):
         """Initialize a TurnToWall instance."""
-        self.MAX_VEL = 0.2
+        self.MIN_VEL = 0.2
         self.BRAKE_SET = 10
         self.YAW_LEFT_SET = 15
         self.NAME = 'Turn To Wall'
@@ -86,12 +87,12 @@ class TurnToWall():
     def execute(self, Rover):
         """Execute the TurnToWall state action."""
         # Stop before turning
-        if Rover.vel > self.MAX_VEL:
+        if Rover.vel > self.MIN_VEL:
             Rover.throttle = 0
             Rover.brake = self.BRAKE_SET
             Rover.steer = 0
         # Turn left towards wall
-        elif Rover.vel <= self.MAX_VEL:
+        elif Rover.vel <= self.MIN_VEL:
             Rover.throttle = 0
             Rover.brake = 0
             Rover.steer = self.YAW_LEFT_SET
@@ -102,7 +103,7 @@ class AvoidWall():
 
     def __init__(self):
         """Initialize a AvoidWall instance."""
-        self.MAX_VEL = 0.2
+        self.MIN_VEL = 0.2
         self.BRAKE_SET = 10
         self.YAW_RIGHT_SET = -15
         self.NAME = 'Avoid Wall'
@@ -110,12 +111,12 @@ class AvoidWall():
     def execute(self, Rover):
         """Execute the AvoidWall state action."""
         # Stop before turning
-        if Rover.vel > self.MAX_VEL:
+        if Rover.vel > self.MIN_VEL:
             Rover.throttle = 0
             Rover.brake = self.BRAKE_SET
             Rover.steer = 0
         # Turn right to avoid left wall
-        elif Rover.vel <= self.MAX_VEL:
+        elif Rover.vel <= self.MIN_VEL:
             Rover.throttle = 0
             Rover.brake = 0
             Rover.steer = self.YAW_RIGHT_SET
@@ -126,7 +127,7 @@ class AvoidObstacles():
 
     def __init__(self):
         """Initialize a AvoidObstacles instance."""
-        self.MAX_VEL = 0.2
+        self.MIN_VEL = 0.2
         self.BRAKE_SET = 10
         self.YAW_LEFT_SET = 15
         self.YAW_RIGHT_SET = -15
@@ -137,12 +138,12 @@ class AvoidObstacles():
         """Execute the AvoidObstacles state action."""
         nav_heading = np.mean(Rover.nav_angles)
         # Stop before avoiding obstacles
-        if Rover.vel > self.MAX_VEL:
+        if Rover.vel > self.MIN_VEL:
             Rover.throttle = 0
             Rover.brake = self.BRAKE_SET
             Rover.steer = 0
         # Turn left or right depending on where nav terrain is
-        elif Rover.vel <= self.MAX_VEL:
+        elif Rover.vel <= self.MIN_VEL:
             Rover.throttle = 0
             Rover.brake = 0
             # Turn right if nav terrain is more than 17 deg to the right
@@ -236,15 +237,17 @@ class WaitForPickupFinish():
 
 class GetUnstuck():
     """class for GetUnstuck state."""
+
     def __init__(self):
         """Initialize a GetUnstuck instance."""
         self.THROTTLE_SET = 1.0
         self.YAW_LEFT_SET = 15
         self.YAW_RIGHT_SET = -15
         self.OBS_OFFSET_YAW = 35
-        self.name = 'Get Unstuck'
+        self.NAME = 'Get Unstuck'
 
     def execute(self, Rover):
+        """Execute the GetUnstuck state action."""
         nav_heading = np.mean(Rover.nav_angles)
 
         # Yaw value measured from either
@@ -300,7 +303,8 @@ class ReturnHome():
     def execute(self, Rover):
         """Execute the ReturnHome state action."""
         # Transform home coordinates to rover frame
-        home_pixpts_rf = world_to_rover(self.home_pixpts_wf, Rover.pos)
+        home_pixpts_rf = world_to_rover(self.home_pixpts_wf,
+                                        Rover.pos, Rover.yaw)
         home_distances, home_headings = to_polar_coords(home_pixpts_rf)
         # Update Rover home polar coordinates
         Rover.home_distance = np.mean(home_distances)
@@ -390,7 +394,8 @@ class Park():
     def execute(self, Rover):
         """Execute the Park state action."""
         # Transform home coordinates to rover frame
-        home_pixpts_rf = world_to_rover(self.home_pixpts_wf, Rover.pos)
+        home_pixpts_rf = world_to_rover(self.home_pixpts_wf,
+                                        Rover.pos, Rover.yaw)
         home_distances, home_headings = to_polar_coords(home_pixpts_rf)
         # Update Rover home polar coordinates
         Rover.home_heading = np.mean(home_headings)
@@ -415,4 +420,4 @@ class Park():
             # Otherwise stop
             elif -10 < Rover.home_heading < 10:
                 Rover.steer = 0
-                Rover.brake = self.brake_set
+                Rover.brake = self.BRAKE_SET
