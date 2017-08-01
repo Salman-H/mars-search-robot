@@ -10,11 +10,25 @@ rover environment that identifies regions of interests (ROIs), and
 superimpose this view on the ground truth worldmap.
 
 NOTE:
+
+Units:
 time -- seconds
 distance -- meters
 velocity -- meters/second
 angle, heading -- degrees
 yaw, pitch, roll -- degrees
+
+Short Forms:
+pixpts -- pixel points
+nav -- navigable terrain pixels
+obs -- obstacle pixels
+rock -- rock pixels
+
+Abbreviations:
+ROI -- Regions of interest
+pf -- perspective frame
+rf -- rover frame
+wf -- world frame
 
 """
 
