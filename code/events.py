@@ -162,7 +162,7 @@ def can_pickup_sample(Rover):
     return Rover.near_sample and Rover.vel <= 0.1
 
 
-def completed_mission(Rover, min_samples=6, min_mapped=95, max_time=110):
+def completed_mission(Rover, min_samples=6, min_mapped=95, max_time=700):
     """Check if rover has completed mission criteria."""
     return (Rover.samples_collected >= min_samples
             and Rover.perc_mapped >= min_mapped
