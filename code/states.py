@@ -228,7 +228,7 @@ class WaitForPickupFinish():
 
     def __init__(self):
         """Initialize a WaitForPickupFinish instance."""
-        self.NAME = 'Pickup Sample.'
+        self.NAME = 'Pickup Sample'
 
     def execute(self, Rover):
         """Execute the WaitForPickupFinish state action."""
@@ -389,7 +389,7 @@ class Park():
         self.BRAKE_SET = 10
         self.YAW_LEFT_SET = 15
         self.YAW_RIGHT_SET = -15
-        self.name = 'Reached Home!'
+        self.NAME = 'Reached Home!'
 
     def execute(self, Rover):
         """Execute the Park state action."""
