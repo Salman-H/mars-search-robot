@@ -55,7 +55,7 @@ class FollowWall():
         self.YAW_LEFT_SET = 15
         self.YAW_RIGHT_SET = -15
         self.THROTTLE_SET = 0.8
-        self.WALL_ANGLE_OFFSET = -9.9
+        self.WALL_ANGLE_OFFSET = -9.2
         self.NAME = 'Follow Wall'
 
     def execute(self, Rover):
@@ -131,7 +131,7 @@ class AvoidObstacles():
         self.BRAKE_SET = 10
         self.YAW_LEFT_SET = 15
         self.YAW_RIGHT_SET = -15
-        self.THROTTLE_SET = -1.0
+        # self.THROTTLE_SET = -1.0
         self.NAME = 'Avoid Obstacles'
 
     def execute(self, Rover):
@@ -154,8 +154,7 @@ class AvoidObstacles():
                 Rover.steer = self.YAW_LEFT_SET
             # Back up e.g. if nav_angles are NaN
             else:
-                Rover.steer = 0
-                Rover.throttle = self.THROTTLE_SET
+                Rover.steer = self.YAW_RIGHT_SET
 
 
 class GoToSample():
@@ -165,7 +164,7 @@ class GoToSample():
         """Initialize a GoToSample instance."""
         self.THROTTLE_SET = 0.39
         self.APPROACH_VEL = 1.0
-        self.HEADING_BIAS = -3
+        self.HEADING_BIAS = -3.6
         self.BRAKE_SET = 10
         self.YAW_LEFT_SET = 15
         self.YAW_RIGHT_SET = -15
@@ -173,30 +172,39 @@ class GoToSample():
 
     def execute(self, Rover):
         """Execute the GoToSample state action."""
-        # Add slight right bias to heading so as not to bump in left wall
-        rock_heading = np.mean(Rover.rock_angles) + self.HEADING_BIAS
+        rock_pixs = len(Rover.rock_angles)
         # Stop before going to sample
         if Rover.vel > self.APPROACH_VEL:
             Rover.throttle = 0
             Rover.brake = self.BRAKE_SET
             Rover.steer = 0
+        # Drive to sample
         elif(Rover.vel <= self.APPROACH_VEL):
-            # Yaw left if rock sample to left more than 23 deg
-            if rock_heading >= 23:
+            # If sample in view
+            if rock_pixs >= 1:
+                # Add a right bias to heading so as not to bump in left wall
+                rock_heading = np.mean(Rover.rock_angles) + self.HEADING_BIAS
+                # Yaw left if rock sample to left more than 23 deg
+                if rock_heading >= 23:
+                    Rover.throttle = 0
+                    Rover.brake = 0
+                    Rover.steer = self.YAW_LEFT_SET
+                # Yaw right if rock sample to right more than -23 deg
+                elif rock_heading <= -23:
+                    Rover.throttle = 0
+                    Rover.brake = 0
+                    Rover.steer = self.YAW_RIGHT_SET
+                # Otherwise drive at average rock sample heading
+                elif (-23 < rock_heading < 23) or math.isnan(rock_heading):
+                    Rover.brake = 0
+                    Rover.throttle = self.THROTTLE_SET
+                    Rover.steer = np.clip(rock_heading,
+                                          self.YAW_RIGHT_SET,
+                                          self.YAW_LEFT_SET)
+            else:  # rock not in view
                 Rover.throttle = 0
                 Rover.brake = 0
                 Rover.steer = self.YAW_LEFT_SET
-            # Yaw right if rock sample to right more than -23 deg
-            elif rock_heading <= -23:
-                Rover.throttle = 0
-                Rover.brake = 0
-                Rover.steer = self.YAW_RIGHT_SET
-            # Otherwise drive at average rock sample heading
-            elif -23 < rock_heading < 23 or math.isnan(rock_heading):
-                Rover.brake = 0
-                Rover.throttle = self.THROTTLE_SET
-                Rover.steer = np.clip(rock_heading,
-                                      self.YAW_RIGHT_SET, self.YAW_LEFT_SET)
 
 
 class InitiatePickup():
@@ -333,7 +341,7 @@ class ReturnHome():
         # Slow down while keeping current heading
         elif 100 < Rover.home_distance <= 200:
             if Rover.vel < self.SLOW_VEL:
-                Rover.throttle = SLOW_THROTTLE_SET
+                Rover.throttle = self.SLOW_THROTTLE_SET
             else:
                 Rover.throttle = 0
             Rover.brake = 0
