@@ -246,6 +246,8 @@ Perception is implemented in the module, perception.py. The same steps, as descr
 In addition to the perception processes described in the previous section, the following modifications and improvements are made in this module:
 
 * An effort has been made to replace magic numbers with named constants wherever possible
+* All angles are expressed in degrees unless those needed for geometric transformation matrices
+* Python *namedtuples* are sometimes used to express coordinates as a single variable to make their access more readable
 * To be able to locate coordinates on the world e.g. those of the rover starting location, functions for inverse transformations are added to convert pixel points from the world frame to the rover's frame:
   * *inv_translate_pixpts*
   * *inv_rotate_pixpts*
@@ -282,11 +284,8 @@ The strategy for locating and collecting rock samples is devised in a way that i
 ##### Getting unstuck
 To detect if the rover has gotten stuck somewhere, a timer is started every time the velocity drops to 0. If the time exceeds the designated *stuck time* for a given state, the *GetUnstuck* state is activated. If sufficient velocity is reached during the unstuck maneuvers, the *getting_unstuck* handler switches to another state. The timer has to be switched off every time the rover transitions to a different state to account for the possibility of getting stuck in that state.
 
-##### Mission criteria
-The mission is deemed complete when the rover has collected all six rock samples and mapped at least 95% of the environment or time spent doing so has exceeded 700 seconds, whichever comes first.
-
 ##### Returning home
-The home coordinates are expressed in the rover's frame using the *world_to_rover* function from the *perception* module, as described in the previous section. Home cartesian coordinates are then converted to polar coordinates and the distance and heading to home is tracked. The distance to home is used to vary the rover's speed and heading profiles as follows:
+The home world coordinates (99.7, 85.6) are expressed in the rover's frame using the *world_to_rover* function from the *perception* module, as described in the previous section. Home cartesian coordinates are then converted to polar coordinates and the distance and heading to home is tracked. The distance to home is used to vary the rover's speed and heading profiles as follows:
 
 * When the rover is sufficiently far away from home, a pure nav heading is used
 * When the rover gets closer to home, a weighted average of home and nav headings is used with a 3:7 ratio
@@ -307,16 +306,22 @@ The simulator's <span style="color: firebrick">Autonomous mode</span> is launche
 python drive_rover.py
 ```
 
-#### 6.1 Results
+##### Mission criteria
+The mission is deemed complete when the rover has collected all six rock samples and mapped at least 95% of the environment or time spent doing so has exceeded 680 seconds, whichever comes first.
+
+##### Note on unstuck
+It takes anywhere from 2 to 5 seconds for the *unstuck* routine to kick in if the rover gets stuck in a repetitive behavior, depending on the circumstances leading to that behavior.
+
+#### 6.1 Mission Results
 After multiple runs in the simulator, the following results are achieved:
 
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/demo_results.png" alt="" width="99.9%" align="">
 
-* Environment mapped: &nbsp; *> 90%*
+* Environment mapped: &nbsp; *92 - 96 %*
 * Mapping fidelity: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *> 80%*
 * Rocks located: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *≥ 6*
 * Rocks collected: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *≥ 6*
-* Time taken: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *700 - 800 s*
+* Time taken: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *690 - 780 s*
 
 **Note:** The simulator is run on a machine with the following specifications
 
@@ -332,7 +337,7 @@ After multiple runs in the simulator, the following results are achieved:
 **Note:** The autonomous mode is so far tested with the following simulator settings
 
 * Graphics Quality: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; *Fantastic*
-* Screen Resolution: &nbsp;&nbsp;&nbsp; *960 x 720, 1440 x 960*
+* Screen Resolution: &nbsp;&nbsp;&nbsp; *1440 x 960*
 
 #### 6.2 Improvements
 In addition to the design improvements described in Section 5, the following enhancements can be made in the following areas:
@@ -340,7 +345,7 @@ In addition to the design improvements described in Section 5, the following enh
 Analysis of camera images can be enhanced to devise techniques for detecting more tricky obstacle situations, such as, rocks that protrude from the sides of the mountains and otherwise not detected in the current design.
 
 ##### Decision-making
-There are a few redundancies in the actions defined in the states module which can be removed to make the state machine more versatile and maintainable. The current implementation of the state machine can also be improved by using the python *design pattern* for a state machine involving stacks.
+There are a few redundancies in the actions defined in the states module which can be removed to make the state machine more versatile and maintainable. The current implementation of the state machine can also be improved by using the python *design pattern* for a state machine involving stacks. Ultimately, the wall-following approach should be replaced with a path-planning strategy e.g. involving Dijkstra's or A-star shortest-path algorithms.
 
 ------------
 > Copyright © 2017, Salman Hashmi. See attached licence
