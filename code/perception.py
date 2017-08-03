@@ -148,7 +148,7 @@ def perspect_to_rover(binary_img):
     binary_img -- single channel 2D warped numpy image in perspective frame
 
     Return value:
-    pixpts_rf -- namedtuple of numpy arrays of pixel x,y points in rover frame
+    pixpts_rf -- tuple of numpy arrays of pixel x,y points in rover frame
 
     """
     # Dimension of input image
@@ -162,10 +162,7 @@ def perspect_to_rover(binary_img):
     # of the photographed image
     xpix_pts_rf = -(ypix_pts_pf - height).astype(np.float)
     ypix_pts_rf = -(xpix_pts_pf - width/2).astype(np.float)
-
-    # Define a named tuple for the three regions of interest
-    PixPointsRf = namedtuple('PixPointsRf', 'x y')
-    pixpts_rf = PixPointsRf(xpix_pts_rf, ypix_pts_rf)
+    pixpts_rf = xpix_pts_rf, ypix_pts_rf
 
     return pixpts_rf
 
@@ -175,16 +172,17 @@ def to_polar_coords(pixpts):
     Convert cartesian coordinates of pixels to polar coordinates.
 
     Keyword arguments:
-    pixpts -- namedtuple of numpy arrays of pixel x,y points
+    pixpts -- tuple of numpy arrays of pixel x,y points
 
     Return value:
     dists, angles -- distance(m) and angles(deg) to pixpts
 
     """
     rad2deg = 180./np.pi
+    xpix_pts, ypix_pts = pixpts
 
-    dists = np.sqrt(pixpts.x**2 + pixpts.y**2)
-    angles = np.arctan2(pixpts.y, pixpts.x)*rad2deg
+    dists = np.sqrt(xpix_pts**2 + ypix_pts**2)
+    angles = np.arctan2(ypix_pts, xpix_pts)*rad2deg
 
     return dists, angles
 
@@ -366,7 +364,7 @@ def perception_step(Rover, R=0, G=1, B=2):
     # Convert above cartesian coordinates to polar coordinates
     Rover.nav_dists, Rover.nav_angles = to_polar_coords(nav_pixpts_rf)
     Rover.obs_dists, Rover.obs_angles = to_polar_coords(obs_pixpts_rf)
-    Rover.rock_dists, Rover.rock_angles = to_polar_coords(rock_pixpts_rf)
+    Rover.rock_dists = to_polar_coords(rock_pixpts_rf)[0]
 
     # Extract subset of nav_angles that are left of rover heading
     Rover.nav_angles_left = Rover.nav_angles[Rover.nav_angles > 0]
@@ -375,6 +373,9 @@ def perception_step(Rover, R=0, G=1, B=2):
     nav_pixpts_rf = [pts[Rover.nav_dists < 60] for pts in nav_pixpts_rf]
     obs_pixpts_rf = [pts[Rover.obs_dists < 80] for pts in obs_pixpts_rf]
     rock_pixpts_rf = [pts[Rover.rock_dists < 70] for pts in rock_pixpts_rf]
+
+    # Convert rock cartesian coords to polar coords
+    Rover.rock_angles = to_polar_coords(rock_pixpts_rf)[1]
 
     # Transform pixel points of ROIs from rover frame to world frame
     nav_pixpts_wf = rover_to_world(nav_pixpts_rf, Rover.pos, Rover.yaw)
