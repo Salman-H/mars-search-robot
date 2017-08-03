@@ -109,7 +109,7 @@ def at_left_obstacle(Rover, safe_pixs=50):
     return nav_pixs_left < safe_pixs
 
 
-def sample_on_left(Rover, rock_dist_limit=73, min_left_angle=0.0):
+def sample_on_left(Rover, rock_dist_limit=71, min_left_angle=0.0):
     """Check if a sample is spotted on the left.
 
     Keyword arguments:
@@ -162,13 +162,13 @@ def can_pickup_sample(Rover):
     return Rover.near_sample and Rover.vel <= 0.1
 
 
-def completed_mission(Rover, min_samples=6, min_mapped=95, max_time=700):
+def completed_mission(Rover, min_samples=6, min_mapped=95, max_time=680):
     """Check if rover has completed mission criteria."""
     return (Rover.samples_collected >= min_samples
             and Rover.perc_mapped >= min_mapped
             ) or Rover.total_time >= max_time
 
 
-def reached_home(Rover, max_dist=5):
+def reached_home(Rover, max_dist=3):
     """Check if rover has reached home after completing mission."""
     return Rover.going_home and Rover.home_distance < max_dist
