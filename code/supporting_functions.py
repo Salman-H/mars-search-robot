@@ -221,15 +221,15 @@ def create_output_images(Rover, Decider):
         cv2.putText(map_add, "distance: ",
                     (3, 160),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1)
-        cv2.putText(map_add, ""+str(np.round(Rover.home_distance, 1)),
+        cv2.putText(map_add, ""+str(np.round(Rover.home_distance, 1))+' m',
                     (55, 160),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 0), 1)
 
         cv2.putText(map_add, "heading: ",
                     (3, 175),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.32, (255, 255, 255), 1)
-        cv2.putText(map_add, ""+str(np.round(Rover.home_heading, 1)),
-                    (55, 175),
+        cv2.putText(map_add, ""+str(np.round(Rover.home_heading, 1))+' deg',
+                    (51, 175),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 0), 1)
     else:
         cv2.putText(map_add, "Mission:",
