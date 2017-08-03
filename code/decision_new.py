@@ -108,8 +108,6 @@ class DecisionSupervisor():
             else:
                 endtime = time.time()
                 exceeded_stucktime = (endtime - self.starttime) > stucktime
-                if exceeded_stucktime:
-                    Rover.timer_on = False
         else:  # if started to move then switch OFF/Reset timer
             Rover.timer_on = False
             Rover.stuck_heading = 0.0
