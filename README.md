@@ -25,19 +25,23 @@ NASA's [Curiosity Rover](https://en.wikipedia.org/wiki/Curiosity_(rover)) landed
 
 And while this is not direct evidence to support life beyond Earth, these are immensely important discoveries. More concrete evidence could eventually confirm that life is not specific to Earth but is common in the universe!
 
+<br>
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
 <br>
-<p><small> The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</small></p>
+<sup>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sup>
 </p>
+<br>
 
 Besides assessing past habitability, exploring the elemental composition of samples is also important to plan and design life-support systems for future manned missions. According to the University of Boulder's [Center for Science and Technology Policy Research (CSTPR)](http://sciencepolicy.colorado.edu/), this exploration has so far shown that the key life-support compounds of oxygen, nitrogen, and hydrogen are present on Mars, and its soil can provide radiation shielding.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-selfie-bd.webp" alt="" width="98%">
 <br>
-<sup>  Curiosity takes a self-portrait (selfie) and captures a photo of earth that puts things into perspective. (Credit: NASA/JPL-Caltech)</sup>
+<sup>Curiosity takes a self-portrait (selfie) and captures a photo of earth that puts things into perspective (Credit: NASA/JPL-Caltech)</sup>
 </p>
+<br>
 
 ### The Gist of Robotics
 
@@ -62,11 +66,13 @@ The project is carried out in a simulation environment built with the [Unity gam
 
 *Training Mode* can be used to manually drive the rover using your mouse or keyboard. This is helpful for familiarizing yourself with the simulator and its environment. Manual driving can also be used to record sensor data for telemetry purposes.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/sim_screenshot.webp" alt="" width="98%">
 <br>
-<sup> The simulator in Training Mode. (Credit: Udacity)</sup>
+<sup> The simulator in Training Mode (Credit: Udacity)</sup>
 </p>
+<br>
 
 However, to use the simulator in *Autonomous Mode*, the rover will have to be programmed for autonomous action. This will require [Python 3](https://www.python.org/downloads/) as the programming language, along with the following [package dependencies](https://www.activestate.com/resources/quick-reads/python-dependencies-everything-you-need-to-know/):
 
@@ -100,17 +106,19 @@ Udacity's minimum criteria is to map at least 40% of the mission area at 60% fid
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/min_requirements.webp" alt="" width="75%">
 <br>
-<sup> Results of a mission run in the simulator. (Credit: Udacity)</sup>
+<sup> Results of a mission run in the simulator (Credit: Udacity)</sup>
 </p>
+<br>
 
 In contrast, the objective of the NASA Sample Return Challenge is not only to locate samples of interest but also to collect them and return them to the starting point!
 
 Our mission, should we choose to accept it, is to locate *and* collect *all* six samples and bring them back to the starting point while mapping at least 90% of world with over 75% fidelity in the least possible amount of time.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/rover-auto-trim-compress-v2.gif" alt="" width="75%">
 <br>
-<sup> The rover in autonomous mode. (Credit: Udacity)</sup>
+<sup> The rover in autonomous mode (Credit: Udacity)</sup>
 </p>
 
 In the best-case scenario, the entire environment is mapped at nearly 100% fidelity, but this may be beyond the scope of this project.
@@ -137,19 +145,23 @@ To autonomously drive the rover, it should be able to "see" the area where it ca
 
 Pixels in an incoming camera image can be stored as an indexed collection of data, specifically a two-dimensional [array](https://en.wikipedia.org/wiki/Array_(data_structure)), where the indexes are the pixel locations and the data stored are the pixel colors. This allows us to manipulate the image by performing operations on the array.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/image-as-array.webp" alt="" width="55%">
 <br>
-<sup> Storing an image as an array. (Credit: Eye image: Paul Howson / tdgq.com.au)</sup>
+<sup>&nbsp;Storing an image as an array. (Credit: Eye image: Paul Howson / tdgq.com.au)</sup>
 </p>
+<br>
 
 Images from the rover cam have a dimension of 320x160 pixels. These can be stored as [NumPy](https://numpy.org/) arrays—of type 8-[bit](https://en.wikipedia.org/wiki/Bit) [unsigned integer](https://users.cs.utah.edu/~germain/PPS/Topics/unsigned_integer.html) (uint8)—defined as (160, 320, 3), meaning the image size is 160 pixels in the y-direction (height), 320 pixels in the x-direction (width), and it has three layers, or "color channels." These three color channels of the image are the primary additive colors of red, green, and blue, or "RGB." These can be mixed (per the [RGB color model](https://en.wikipedia.org/wiki/RGB_color_model)) to produce a broad array of colors. More specifically, the combination of intensity values from 0 to 255 across these three channels determines what color is seen in the image. Darker pixels have low intensity values, while brighter pixels have high values. The color black (darkest) has an RGB value of R = 0, G = 0, B = 0, or simply (0, 0, 0), while the color white (brightest) has an RGB value of (255, 255, 255).
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/color-channels-bd.webp" alt="" width="99%">
 <br>
 <sup> The same camera image is displayed separately on each of its red, green, and blue color channels.</sup>
 </p>
+<br>
 
 Notice that while the mountains are relatively dark in all three color channels, both the ground and the sky are brighter, with the ground being the brightest. Since the different regions in the image all have distinct color intensities, it is possible to extract them individually from the image using a [color threshold](https://en.wikipedia.org/wiki/Thresholding_(image_processing)). For example, we can only extract those pixels from the image that correspond to the ground.
 
@@ -161,11 +173,13 @@ In other words, it takes an input color image, discards all pixels from the imag
 
 We need a color threshold that can distinguish between navigable (ground) and non-navigable terrain (rocks and mountains). From some trial and error, we find that above an RGB threshold of (160, 160, 160), only ground pixels can be seen.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/nav-threshed-bd.webp" alt="" width="99%">
 <br>
 <sup> Using a color threshold on a 3-channel image to extract only ground (navigable) terrain pixels into a "threshed," single-channel image.</sup>
 </p>
+<br>
 
 Like the input color image, the output *threshed* image is also stored as an array. But while the color image has three channels (RGB), the threshed image has a single channel: visible or invisble, indicated by a value of one or zero. Hence, it is also called a binary image.
 
@@ -180,11 +194,13 @@ The following HSV color range is used to capture the variation in hue, saturatio
 
 Since the incoming rover cam images are in the RGB color format, they are converted to the HSV format and then *thresholded* on this range to only extract pixels identifying rock samples.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/hsv-threshed-bd.webp" alt="" width="98%">
 <br>
 <sup> Identification of gold-colored rocks by applying an HSV threshold.</sup>
 </p>
+<br>
 
 Like the RGB threshold, only pixels with color properties within the HSV threshold range are extracted. 
 
@@ -198,11 +214,13 @@ In short, we'll have to project the 3D camera images onto the 2D ground! This is
 
 Depending on how we calibrate the perspective transformation, we can achieve a specific size for the projected image in 2D.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/perspect-transform-bd.webp" alt="" width="99%">
 <br>
-<sup> Calibrating a perspective transform where a 1 square-meter region in the 3D camera image corresponds to a 10x10 pixel square in its 2D ground projection.</sup>
+<sup> Calibrating a transform where a 1 square-meter region in the 3D camera image corresponds to a 10x10 pixel square in its 2D ground projection.</sup>
 </p>
+<br>
 
 We want to calibrate the transform such that a one-square-meter ground region in 3D projects to a 10x10 pixel square in 2D. This gives the rover a decent view of the ground ahead and plenty of time to react appropriately to different regions of interest.
 
@@ -210,22 +228,26 @@ We want to calibrate the transform such that a one-square-meter ground region in
 
 Once we have a 2D ground projection of the rover's 3D cam view, we can apply the color thresholds described previously to see the ground with a filtered view for each ROI.
 
+<br>
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/color-thresh-io-bd.webp" alt="" width="99.9%">
 <br>
-<sub> The color_thresh function takes an input warped image and converts it into three separate single-channel images, identifying each of the three ROIs.</sub>
+<sub> The color_thresh function takes an input warped image and converts it into 3 separate single-channel images, identifying each of the 3 ROIs.</sub>
 </p>
+<br>
 <!--In the `color_thresh` function, three different color thresholds are applied to incoming images from the rover camera to extract the (*threshed*) binary images corresponding to, and identify, each ROI.-->
 
 The rover can now "see" what's ahead on the ground to scale, which means it can now compute and travel specific distances. But the rover's view is not yet oriented with respect to its own [coordinate system](https://en.wikipedia.org/wiki/Coordinate_system). You see, the pixels in the projected (or perspective) image are described with respect to the image's own coordinate reference frame. But the rover's coordinate frame is different; e.g., we've chosen to orient the rover's x-axis along the direction it points to.
 
 So, we need to re-calculate the pixel positions from the rover's POV, i.e., with respect to the rover's coordinate system. This is done in the `perspect_to_rover` function.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/perspect-to-rover-bd.webp" alt="" width="95%">
 <br>
 <sup> Expressing the perspective view in the rover's coordinate frame (top-down view).</sup>
 </p>
+<br>
 
 Notice that, after the recalculation, the projected/perspective image is centered at the origin of the rovers' coordinate frame. Fixing a coordinate system relative to the robot is central to many robotic applications as it allows objects in the robot's environment to be described relative to the robot; more specifically, relative to the robot's camera in this case.
 
@@ -235,11 +257,13 @@ The rover is now able to compute the heading and distance to the desired pixel c
 
 The entire process of determining the nav heading from a front cam image is summarized below.
 
+<br>
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/img-proc-pipe-bd.webp" alt="" width="55%">
 <br>
-<sub> Complete image processing pipeline for converting the rover's front-cam view to a ground projection of navigable terrain.</sub>
+<sup> Complete image processing pipeline for converting the rover's front-cam view to a ground projection of navigable terrain.</sup>
 </p>
+<br>
 <!--<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/perception_step_1.png" alt="" width="99.9%">-->
 
 The red arrow above indicates the nav heading, or nav angle, the average angle from the rover to the pixels of the navigable region.
@@ -252,6 +276,7 @@ The idea is for the rover to always keep the mountains and large rocks—collect
 
 There's a better approach, though. Instead of adding an offset to the nav angle, which is the average angle to *all* nav pixels, we can improve wall-following by instead adding an offset to the average angle to only *those* pixels that lie to the left of the rover (nav_angle_left).
 
+<br>
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/wall-following-v2.webp" alt="" width="95%">
 <br>
@@ -261,6 +286,7 @@ There's a better approach, though. Instead of adding an offset to the nav angle,
 <br> • nav_angle_left is the average angle to nav pixels that lie to the left of the rover. 
 </sub>
 </p>
+<br>
 
 While a biased rover heading obtained by offsetting the nav_angle will work in some scenarios, it will not work in those where the nav terrain has a significant deviation from the rover's current heading. It is this same scenario that is depicted in the illustration above. Note how the nav terrain is considerably deviated from the wall and how nav_angle_left is much smaller compared to nav_angle. Since nav_angle_left is comparatively a much better approximation of the wall angle from the rover, a biased rover heading obtained from using this angle as an offset will be able to account for the majority of wall-nav deviation scenarios, resulting in a more robust wall-following behavior.
 
@@ -272,19 +298,23 @@ The second part of navigating the ground is knowing when to finally stop searchi
 
 Ideally, the rover should cover (or map) as much of the world (the designated mission area) as possible so as not to miss any target samples. Furthermore, of the area it does cover, we need to know how much of it corresponds to the actual mission area (fidelity). This requires comparing the rover's actual coverage of the world to a (known) [ground truth](https://en.wikipedia.org/wiki/Ground_truth) map. 
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/ground_truth_map.webp" alt="" width="40%">
 <br>
 <sub> The ground truth map of the world covers a 0.2 square kilometer mission area. (Credit: Udacity)</sub>
 </p>
+<br>
 
 To compare the actual coverage of the mission area with its ground truth, we have to map, or superimpose, ground projections of ROIs onto the ground truth map. This requires the ROI projections to be on the *same* coordinate frame as the map itself, i.e., the *world coordinate frame*. So, we have to transform ROI projections from the rover's coordinate frame to the world's coordinate frame.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/rover-to-world-bd.webp" alt="" width="98%">
 <br>
 <sup> Transforming the rover's coordinate frame to the world coordinate frame. (Credit: Udacity)</sup>
 </p>
+<br>
 
 The *rover coordinate frame* can be [geometrically transformed](https://en.wikipedia.org/wiki/Geometric_transformation) to the *world coordinate frame* by (1) [rotating](https://en.wikipedia.org/wiki/Rotation_matrix) the frame with an angle equal to the rover's [yaw angle](https://en.wikipedia.org/wiki/Yaw_(rotation)) and (2) [translating](https://en.wikipedia.org/wiki/Translation_(geometry)) it with a displacement equal to the rover's position. This is done in the `rover_to_world` function in the perception module.
 
@@ -294,11 +324,13 @@ Once all ROI pixels are available relative to the world coordinate frame, their 
 
 This implies that ROIs can be highlighted on the map itself in real-time by updating this worldmap array with each incoming image from the rover cam.
 
+<br>
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/test_mapping.gif" alt="" width="98%">
 <br>
 <sub> Mapping (or superimposing) ground projections of ROI pixels onto the ground truth map. <br>Color code: blue (navigable); red ( non-navigable); white (target rock samples).</sub>
 </p>
+<br>
 
 Recognize that traversing the mission area with high fidelity depends on 2D ground projections that faithfully depict their source 3D camera images. But accurately projecting rover-cam images to the ground plane requires a stable camera, which is not always the case; the ground terrain, acceleration, deceleration, and steering all affect the rover's stability. A stable drive implies that the rover is not lifting or rolling off of the ground plane, as [characterized by](https://en.wikipedia.org/wiki/Degrees_of_freedom_(mechanics)) its pitch and roll angles.
 
@@ -318,11 +350,13 @@ A [state machine](https://en.wikipedia.org/wiki/Finite-state_machine), or finite
 
 An FSM *listens* for external events, and it *transitions* to a state (of action) when triggered by an event it was listening for. The following set of *events*, *transitions*, and *action states* constitute the rover's decision-making capability.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/fsm-bd.webp" alt="" width="99%">
 <br>
 <sup> The rover's state machine represents its decision-making capability. Key: circles (states); labels (events); arrows (transitions).</sup>
 </p>
+<br>
 
 The circles indicate a *state*, e.g., "Follow Wall," while arrows indicate *transitions* to other states triggered by external *events*. For example, "at_left_obstacle" triggers a transition to the "Avoid Wall" state.
 
@@ -338,11 +372,13 @@ The state machine for the rover's decision-making is implemented in the `decisio
 
 The strategy for locating and collecting rock samples is devised in such a way that it does not conflict with wall-following, where the rover would lose the wall—and its way—while going after a rock sample. To avoid such a situation, samples are only detected if they are nearby, so that the rover can easily find the wall again after collecting them. This is achieved by using a rover-to-rock distance limit beyond which rock samples are ignored. This still allows us to locate and retrieve all rock samples since if a sample is further away—and ignored—while wall-following in one direction, the same sample will be that much closer as the rover makes its way back to it while following the wall on the opposite side.  
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/rock-pickup2.gif" alt="" width="65%">
 <br>
 <sup> Retrieving the target rock sample. (Credit: Udacity)</sup>
 </p>
+<br>
 
 <!--~~The `GoToSample` class governs the actions taken in this state while the `going_to_sample` function handles transitions from this state.~~-->
 
@@ -386,11 +422,13 @@ The mission is deemed complete when the rover has collected all six rock samples
 
 If the rover gets stuck in a repetitive behavior, it takes anywhere from 2 to 5 seconds for the *unstuck* routine to kick in, depending on the circumstances leading to that behavior.
 
+<br>
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/demo_results.webp" alt="" width="99%">
 <br>
 <sup> The rover after successfully completing the mission.</sup>
 </p>
+<br>
 
 After multiple runs in the simulator, the following results are achieved:
 
