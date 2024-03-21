@@ -50,15 +50,9 @@ In this project, we will undertake a simplified version of this challenge based 
 > [!NOTE]
 > A *rover* is a land vehicle. A *robot* is an autonomous mechanical machine. A rover may or may not be a robot. It *can* be a robot if programmed for autonomy—like in this project. So, the terms rover and robot may be used interchangeably.
 
-The project is carried out in a simulation environment built with the [Unity game engine](https://unity.com/). You can download the simulator from the following links, depending on your OS: 
+The project is carried out in a simulation environment built with the [Unity game engine](https://unity.com/). You can download the simulator from these links, depending on your OS: 
 
-<button>Windows</button>
-
-https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip
-
-[<button>MacOS</button>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)
-
-[<button>Linux</button>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)
+<img src='https://icon.horse/icon/microsoft.com' width='13' height='13' alt='icon' /> [Download for Windows](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip) | <img src='https://icon.horse/icon/apple.com' width='14' height='14' alt='icon'/> [Download for MacOS](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip) | <img src='https://icon.horse/icon/kernel.org' width='14' height='14' alt='icon' /> [Download for Linux](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip)
 
 <!--<img src='https://icon.horse/icon/microsoft.com' width='13' height='13' alt='icon' />
 <img src='https://icon.horse/icon/support.apple.com' width='16' height='15' alt='icon'/>
