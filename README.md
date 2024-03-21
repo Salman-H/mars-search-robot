@@ -56,7 +56,7 @@ The project is carried out in a simulation environment built with the [Unity gam
 <img src='https://icon.horse/icon/support.apple.com' width='16' height='15' alt='icon'/>
 <img src='https://icon.horse/icon/kernel.org' width='14' height='14' alt='icon' />-->
 
-<kbd>[Windows](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)</kbd>   <kbd>[MacOS](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip)</kbd>  <kbd>[Linux](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip)</kbd>
+[<kbd>Windows</kbd>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)  [<kbd>MacOS</kbd>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip)  [<kbd>Linux</kbd>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip)
 
 *Training Mode* can be used to manually drive the rover using your mouse or keyboard. This is helpful for familiarizing yourself with the simulator and its environment. Manual driving can also be used to record sensor data for telemetry purposes.
 
