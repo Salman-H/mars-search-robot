@@ -25,10 +25,10 @@ NASA's [Curiosity Rover](https://en.wikipedia.org/wiki/Curiosity_(rover)) landed
 
 And while this is not direct evidence to support life beyond Earth, these are immensely important discoveries. More concrete evidence could eventually confirm that life is not specific to Earth but is common in the universe!
 
-<p align="left"; style="line-height: 100% !important">
+<p align="left"; style="line-height: 90% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
 <br>
-<sup>  The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sup>
+<sub>  The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sub>
 </p>
 
 Besides assessing past habitability, exploring the elemental composition of samples is also important to plan and design life-support systems for future manned missions. According to the University of Boulder's [Center for Science and Technology Policy Research (CSTPR)](http://sciencepolicy.colorado.edu/), this exploration has so far shown that the key life-support compounds of oxygen, nitrogen, and hydrogen are present on Mars, and its soil can provide radiation shielding.
@@ -201,7 +201,7 @@ Depending on how we calibrate the perspective transformation, we can achieve a s
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/perspect-transform-bd.webp" alt="" width="99%">
 <br>
-<sup> Calibrating a perspective transform where a one-square-meter region in the 3D cam image corresponds to a 10x10 pixel square in its 2D ground projection.</sup>
+<sup> Calibrating a perspective transform where a 1 square-meter region in the 3D camera image corresponds to a 10x10 pixel square in its 2D ground projection.</sup>
 </p>
 
 We want to calibrate the transform such that a one-square-meter ground region in 3D projects to a 10x10 pixel square in 2D. This gives the rover a decent view of the ground ahead and plenty of time to react appropriately to different regions of interest.
@@ -210,10 +210,10 @@ We want to calibrate the transform such that a one-square-meter ground region in
 
 Once we have a 2D ground projection of the rover's 3D cam view, we can apply the color thresholds described previously to see the ground with a filtered view for each ROI.
 
-<p align="left"; style="line-height: 100% !important">
+<p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/color-thresh-io-bd.webp" alt="" width="99.9%">
 <br>
-<sup> The color_thresh function takes an input warped image and converts it into three separate single-channel images, identifying each of the three ROIs.</sup>
+<sub> The color_thresh function takes an input warped image and converts it into three separate single-channel images, identifying each of the three ROIs.</sub>
 </p>
 <!--In the `color_thresh` function, three different color thresholds are applied to incoming images from the rover camera to extract the (*threshed*) binary images corresponding to, and identify, each ROI.-->
 
@@ -235,10 +235,10 @@ The rover is now able to compute the heading and distance to the desired pixel c
 
 The entire process of determining the nav heading from a front cam image is summarized below.
 
-<p align="left"; style="line-height: 100% !important">
+<p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/img-proc-pipe-bd.webp" alt="" width="55%">
 <br>
-<sup> Complete image processing pipeline for converting the rover's <br> front-cam view to a ground projection of navigable terrain.</sup>
+<sub> Complete image processing pipeline for converting the rover's front-cam view to a ground projection of navigable terrain.</sub>
 </p>
 <!--<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/perception_step_1.png" alt="" width="99.9%">-->
 
@@ -252,14 +252,14 @@ The idea is for the rover to always keep the mountains and large rocks—collect
 
 There's a better approach, though. Instead of adding an offset to the nav angle, which is the average angle to *all* nav pixels, we can improve wall-following by instead adding an offset to the average angle to only *those* pixels that lie to the left of the rover (nav_angle_left).
 
-<p align="left"; style="line-height: 100% !important">
+<p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/wall-following-v2.webp" alt="" width="95%">
 <br>
-<sup> The wall-following approach. Recall that the rover heading (where the rover points) is defined by the x-axis of the Rover Coordinate Frame.
+<sub> The wall-following approach. Recall that the rover heading (where the rover points) is defined by the x-axis of the Rover Coordinate Frame.
 <br> • nav_angle is the average angle to all navigable terrain pixels. 
 <br> • nav_angle_right is the average angle to nav pixels that lie to the right of the rover. 
 <br> • nav_angle_left is the average angle to nav pixels that lie to the left of the rover. 
-</sup>
+</sub>
 </p>
 
 While a biased rover heading obtained by offsetting the nav_angle will work in some scenarios, it will not work in those where the nav terrain has a significant deviation from the rover's current heading. It is this same scenario that is depicted in the illustration above. Note how the nav terrain is considerably deviated from the wall and how nav_angle_left is much smaller compared to nav_angle. Since nav_angle_left is comparatively a much better approximation of the wall angle from the rover, a biased rover heading obtained from using this angle as an offset will be able to account for the majority of wall-nav deviation scenarios, resulting in a more robust wall-following behavior.
@@ -275,7 +275,7 @@ Ideally, the rover should cover (or map) as much of the world (the designated mi
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/ground_truth_map.webp" alt="" width="40%">
 <br>
-<sup> The ground truth map of the world covers a 0.2 <br>square kilometer mission area. (Credit: Udacity)</sup>
+<sub> The ground truth map of the world covers a 0.2 square kilometer mission area. (Credit: Udacity)</sub>
 </p>
 
 To compare the actual coverage of the mission area with its ground truth, we have to map, or superimpose, ground projections of ROIs onto the ground truth map. This requires the ROI projections to be on the *same* coordinate frame as the map itself, i.e., the *world coordinate frame*. So, we have to transform ROI projections from the rover's coordinate frame to the world's coordinate frame.
@@ -294,10 +294,10 @@ Once all ROI pixels are available relative to the world coordinate frame, their 
 
 This implies that ROIs can be highlighted on the map itself in real-time by updating this worldmap array with each incoming image from the rover cam.
 
-<p align="left"; style="line-height: 100% !important">
+<p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/test_mapping.gif" alt="" width="98%">
 <br>
-<sup> Mapping (or superimposing) ground projections of ROI pixels onto the ground truth map. <br>Color code: blue (navigable); red ( non-navigable); white (target rock samples).</sup>
+<sub> Mapping (or superimposing) ground projections of ROI pixels onto the ground truth map. <br>Color code: blue (navigable); red ( non-navigable); white (target rock samples).</sub>
 </p>
 
 Recognize that traversing the mission area with high fidelity depends on 2D ground projections that faithfully depict their source 3D camera images. But accurately projecting rover-cam images to the ground plane requires a stable camera, which is not always the case; the ground terrain, acceleration, deceleration, and steering all affect the rover's stability. A stable drive implies that the rover is not lifting or rolling off of the ground plane, as [characterized by](https://en.wikipedia.org/wiki/Degrees_of_freedom_(mechanics)) its pitch and roll angles.
@@ -386,9 +386,13 @@ The mission is deemed complete when the rover has collected all six rock samples
 
 If the rover gets stuck in a repetitive behavior, it takes anywhere from 2 to 5 seconds for the *unstuck* routine to kick in, depending on the circumstances leading to that behavior.
 
-After multiple runs in the simulator, the following results are achieved:
+<p align="left"; style="line-height: 100% !important">
+<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/demo_results.webp" alt="" width="99%">
+<br>
+<sup> The rover after successfully completing the mission.</sup>
+</p>
 
-<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/demo_results.webp" alt="" width="99.9%" align="">
+After multiple runs in the simulator, the following results are achieved:
 
 <table border="0">
  <tr>
