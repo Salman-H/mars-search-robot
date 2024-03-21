@@ -29,7 +29,7 @@ And while this is not direct evidence to support life beyond Earth, these are im
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
 <br>
-<sup>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sup>
+<sub>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sub>
 </p>
 <br>
 
@@ -41,7 +41,6 @@ Besides assessing past habitability, exploring the elemental composition of samp
 <br>
 <sup>Curiosity takes a self-portrait (selfie) and captures a photo of earth that puts things into perspective (Credit: NASA/JPL-Caltech)</sup>
 </p>
-<br>
 
 ### The Gist of Robotics
 
@@ -72,7 +71,6 @@ The project is carried out in a simulation environment built with the [Unity gam
 <br>
 <sup> The simulator in Training Mode (Credit: Udacity)</sup>
 </p>
-<br>
 
 However, to use the simulator in *Autonomous Mode*, the rover will have to be programmed for autonomous action. This will require [Python 3](https://www.python.org/downloads/) as the programming language, along with the following [package dependencies](https://www.activestate.com/resources/quick-reads/python-dependencies-everything-you-need-to-know/):
 
@@ -151,7 +149,6 @@ Pixels in an incoming camera image can be stored as an indexed collection of dat
 <br>
 <sup>&nbsp;Storing an image as an array. (Credit: Eye image: Paul Howson / tdgq.com.au)</sup>
 </p>
-<br>
 
 Images from the rover cam have a dimension of 320x160 pixels. These can be stored as [NumPy](https://numpy.org/) arrays—of type 8-[bit](https://en.wikipedia.org/wiki/Bit) [unsigned integer](https://users.cs.utah.edu/~germain/PPS/Topics/unsigned_integer.html) (uint8)—defined as (160, 320, 3), meaning the image size is 160 pixels in the y-direction (height), 320 pixels in the x-direction (width), and it has three layers, or "color channels." These three color channels of the image are the primary additive colors of red, green, and blue, or "RGB." These can be mixed (per the [RGB color model](https://en.wikipedia.org/wiki/RGB_color_model)) to produce a broad array of colors. More specifically, the combination of intensity values from 0 to 255 across these three channels determines what color is seen in the image. Darker pixels have low intensity values, while brighter pixels have high values. The color black (darkest) has an RGB value of R = 0, G = 0, B = 0, or simply (0, 0, 0), while the color white (brightest) has an RGB value of (255, 255, 255).
 
@@ -161,7 +158,6 @@ Images from the rover cam have a dimension of 320x160 pixels. These can be store
 <br>
 <sup> The same camera image is displayed separately on each of its red, green, and blue color channels.</sup>
 </p>
-<br>
 
 Notice that while the mountains are relatively dark in all three color channels, both the ground and the sky are brighter, with the ground being the brightest. Since the different regions in the image all have distinct color intensities, it is possible to extract them individually from the image using a [color threshold](https://en.wikipedia.org/wiki/Thresholding_(image_processing)). For example, we can only extract those pixels from the image that correspond to the ground.
 
@@ -179,7 +175,6 @@ We need a color threshold that can distinguish between navigable (ground) and no
 <br>
 <sup> Using a color threshold on a 3-channel image to extract only ground (navigable) terrain pixels into a "threshed," single-channel image.</sup>
 </p>
-<br>
 
 Like the input color image, the output *threshed* image is also stored as an array. But while the color image has three channels (RGB), the threshed image has a single channel: visible or invisble, indicated by a value of one or zero. Hence, it is also called a binary image.
 
@@ -200,7 +195,6 @@ Since the incoming rover cam images are in the RGB color format, they are conver
 <br>
 <sup> Identification of gold-colored rocks by applying an HSV threshold.</sup>
 </p>
-<br>
 
 Like the RGB threshold, only pixels with color properties within the HSV threshold range are extracted. 
 
@@ -218,7 +212,7 @@ Depending on how we calibrate the perspective transformation, we can achieve a s
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/perspect-transform-bd.webp" alt="" width="99%">
 <br>
-<sup> Calibrating a transform where a 1 square-meter region in the 3D camera image corresponds to a 10x10 pixel square in its 2D ground projection.</sup>
+<sub> Calibrating a transform where a 1 square-meter region in the 3D camera image corresponds to a 10x10 pixel square in its 2D ground projection.</sub>
 </p>
 <br>
 
@@ -247,7 +241,6 @@ So, we need to re-calculate the pixel positions from the rover's POV, i.e., with
 <br>
 <sup> Expressing the perspective view in the rover's coordinate frame (top-down view).</sup>
 </p>
-<br>
 
 Notice that, after the recalculation, the projected/perspective image is centered at the origin of the rovers' coordinate frame. Fixing a coordinate system relative to the robot is central to many robotic applications as it allows objects in the robot's environment to be described relative to the robot; more specifically, relative to the robot's camera in this case.
 
@@ -263,7 +256,6 @@ The entire process of determining the nav heading from a front cam image is summ
 <br>
 <sup> Complete image processing pipeline for converting the rover's front-cam view to a ground projection of navigable terrain.</sup>
 </p>
-<br>
 <!--<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/perception_step_1.png" alt="" width="99.9%">-->
 
 The red arrow above indicates the nav heading, or nav angle, the average angle from the rover to the pixels of the navigable region.
@@ -314,7 +306,6 @@ To compare the actual coverage of the mission area with its ground truth, we hav
 <br>
 <sup> Transforming the rover's coordinate frame to the world coordinate frame. (Credit: Udacity)</sup>
 </p>
-<br>
 
 The *rover coordinate frame* can be [geometrically transformed](https://en.wikipedia.org/wiki/Geometric_transformation) to the *world coordinate frame* by (1) [rotating](https://en.wikipedia.org/wiki/Rotation_matrix) the frame with an angle equal to the rover's [yaw angle](https://en.wikipedia.org/wiki/Yaw_(rotation)) and (2) [translating](https://en.wikipedia.org/wiki/Translation_(geometry)) it with a displacement equal to the rover's position. This is done in the `rover_to_world` function in the perception module.
 
@@ -354,7 +345,7 @@ An FSM *listens* for external events, and it *transitions* to a state (of action
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/fsm-bd.webp" alt="" width="99%">
 <br>
-<sup> The rover's state machine represents its decision-making capability. Key: circles (states); labels (events); arrows (transitions).</sup>
+<sub> The rover's state machine represents its decision-making capability. Key: circles (states); labels (events); arrows (transitions).</sub>
 </p>
 <br>
 
@@ -378,7 +369,6 @@ The strategy for locating and collecting rock samples is devised in such a way t
 <br>
 <sup> Retrieving the target rock sample. (Credit: Udacity)</sup>
 </p>
-<br>
 
 <!--~~The `GoToSample` class governs the actions taken in this state while the `going_to_sample` function handles transitions from this state.~~-->
 
@@ -428,7 +418,6 @@ If the rover gets stuck in a repetitive behavior, it takes anywhere from 2 to 5 
 <br>
 <sup> The rover after successfully completing the mission.</sup>
 </p>
-<br>
 
 After multiple runs in the simulator, the following results are achieved:
 
