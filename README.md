@@ -50,23 +50,15 @@ In this project, we will undertake a simplified version of this challenge based 
 > [!NOTE]
 > A *rover* is a land vehicle. A *robot* is an autonomous mechanical machine. A rover may or may not be a robot. It *can* be a robot if programmed for autonomy—like in this project. So, the terms rover and robot may be used interchangeably.
 
-The project is carried out in a simulation environment built with the [Unity game engine](https://unity.com/). You can download the simulator from these links, depending on your OS: 
+The project is carried out in a simulation environment built with the [Unity game engine](https://unity.com/). You can download the simulator from the following links, depending on your OS: 
 
-<img src='https://icon.horse/icon/microsoft.com' width='13' height='13' alt='icon' /> [Download for Windows](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip) | <img src='https://icon.horse/icon/apple.com' width='14' height='14' alt='icon'/> [Download for MacOS](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip) | <img src='https://icon.horse/icon/kernel.org' width='14' height='14' alt='icon' /> [Download for Linux](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip)
-
-<!--<img src='https://icon.horse/icon/microsoft.com' width='13' height='13' alt='icon' />
-<img src='https://icon.horse/icon/support.apple.com' width='16' height='15' alt='icon'/>
-<img src='https://icon.horse/icon/kernel.org' width='14' height='14' alt='icon' />-->
-
-<!--[<kbd>Download for Windows</kbd>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)  [<kbd>MacOS</kbd>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip)  [<kbd>Linux</kbd>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip)-->
-
-<!--<a download="Windows_Roversim.zip" href="https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/" title="Windows">
-    <img alt="Windows" src="https://icon.horse/icon/microsoft.com" width='23' height='22'>
-</a> <a download="Windows_Roversim.zip" href="https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/" title="Windows">
-    <img alt="Windows" src="https://icon.horse/icon/support.apple.com" width='27' height='25'>
-</a>
-
-<a href="/path/to/image" download="myimage"><img src="/path/to/image" /></a>-->
+<p>
+<kbd>
+  <a href="https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip" title="Download for Windows"><img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" /></a>
+  <a href="https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip" title="Download for MacOS"><img src="https://img.shields.io/badge/MacOS-c0c0c0?style=for-the-badge&logo=apple&logoColor=black" /></a>
+  <a href="https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip" title="Download for Linux"><img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" /></a>
+</kbd>
+</p>
 
 *Training Mode* can be used to manually drive the rover using your mouse or keyboard. This is helpful for familiarizing yourself with the simulator and its environment. Manual driving can also be used to record sensor data for telemetry purposes.
 
