@@ -25,10 +25,10 @@ NASA's [Curiosity Rover](https://en.wikipedia.org/wiki/Curiosity_(rover)) landed
 
 And while this is not direct evidence to support life beyond Earth, these are immensely important discoveries. More concrete evidence could eventually confirm that life is not specific to Earth but is common in the universe!
 
-<p align="left"; style="line-height: 90% !important">
+<p align="left"; style="line-height: 60% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
 <br>
-<sub>  The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sub>
+<sup>  The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sup>
 </p>
 
 Besides assessing past habitability, exploring the elemental composition of samples is also important to plan and design life-support systems for future manned missions. According to the University of Boulder's [Center for Science and Technology Policy Research (CSTPR)](http://sciencepolicy.colorado.edu/), this exploration has so far shown that the key life-support compounds of oxygen, nitrogen, and hydrogen are present on Mars, and its soil can provide radiation shielding.
