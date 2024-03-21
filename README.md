@@ -270,13 +270,15 @@ There's a better approach, though. Instead of adding an offset to the nav angle,
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/wall-following-v2.webp" alt="" width="95%">
 <br>
-<sub> The wall-following approach. Recall that the rover heading (where the rover points) is defined by the x-axis of the Rover Coordinate Frame.
-<br> • nav_angle is the average angle to all navigable terrain pixels. 
-<br> • nav_angle_right is the average angle to nav pixels that lie to the right of the rover. 
-<br> • nav_angle_left is the average angle to nav pixels that lie to the left of the rover. 
-</sub>
-</p>
+<sub> The wall-following approach. Recall that the rover heading (where the rover points) is defined by the x-axis of the Rover Coordinate Frame.</sub>
+<sub>
 <br>
+
+In the illustration above:
+
+- *nav_angle* is the average angle to all navigable terrain pixels
+- *nav_angle_right* is the average angle to nav pixels that lie to the right of the rover
+- *nav_angle_left* is the average angle to nav pixels that lie to the left of the rover
 
 While a biased rover heading obtained by offsetting the nav_angle will work in some scenarios, it will not work in those where the nav terrain has a significant deviation from the rover's current heading. It is this same scenario that is depicted in the illustration above. Note how the nav terrain is considerably deviated from the wall and how nav_angle_left is much smaller compared to nav_angle. Since nav_angle_left is comparatively a much better approximation of the wall angle from the rover, a biased rover heading obtained from using this angle as an offset will be able to account for the majority of wall-nav deviation scenarios, resulting in a more robust wall-following behavior.
 
