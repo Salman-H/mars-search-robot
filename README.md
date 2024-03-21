@@ -52,14 +52,8 @@ In this project, we will undertake a simplified version of this challenge based 
 
 The project is carried out in a simulation environment built with the [Unity game engine](https://unity.com/). You can download the simulator from the following links, depending on your OS:
 
-- [Windows](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)
+<kbd>[<img src='https://icon.horse/icon/microsoft.com' width='13' height='13' alt='icon' /> Windows](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)</kbd>  <kbd>[<img src='https://icon.horse/icon/support.apple.com' width='15' height='15' alt='icon' /> MacOS](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip)</kbd>  <kbd>[<img src='https://icon.horse/icon/kernel.org' width='14' height='14' alt='icon' /> Linux](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip)</kbd>
 
-- [MacOS](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip)
-
-- [Linux](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip)
-
-<!--  
-**[<img src='https://icon.horse/icon/kernel.org' width='14' height='14' alt='icon' /> Linux](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip)**-->
 
 *Training Mode* can be used to manually drive the rover using your mouse or keyboard. This is helpful for familiarizing yourself with the simulator and its environment. Manual driving can also be used to record sensor data for telemetry purposes.
 
