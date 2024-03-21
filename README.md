@@ -25,16 +25,18 @@ NASA's [Curiosity Rover](https://en.wikipedia.org/wiki/Curiosity_(rover)) landed
 
 And while this is not direct evidence to support life beyond Earth, these are immensely important discoveries. More concrete evidence could eventually confirm that life is not specific to Earth but is common in the universe!
 
-<p align="left"; style="line-height: 60% !important">
+<p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
 <br>
+<p>
 <sup>  The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sup>
+</p>
 </p>
 
 <p align="left">
 <figure>
   <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
-  <figcaption>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</figcaption>
+  <figcaption><sup>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sup></figcaption>
 </figure>
 </p>
 
