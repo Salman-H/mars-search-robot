@@ -58,7 +58,11 @@ The project is carried out in a simulation environment built with the [Unity gam
 <p>
 <kbd>
   <a href="https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip" title="Download for Windows"><img src="https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" /></a>
+</kbd> 
+<kbd>
   <a href="https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Mac_Roversim.zip" title="Download for MacOS"><img src="https://img.shields.io/badge/MacOS-c0c0c0?style=for-the-badge&logo=apple&logoColor=black" /></a>
+</kbd> 
+<kbd>
   <a href="https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Linux_Roversim.zip" title="Download for Linux"><img src="https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" /></a>
 </kbd>
 </p>
