@@ -7,7 +7,7 @@
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/title-displays-1.webp" alt="" width="94%">
 <br>
-<sup><i>Udacity</i></sup>
+<sup><i>(Udacity)</i></sup>
 </p>
 <!--auto_mode_4.webp-->
 
@@ -29,7 +29,7 @@ And while this is not direct evidence to support life beyond Earth, these are im
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
 <br>
-<sub>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. <i>NASA/JPL-Caltech</i></span></sub>
+<sub>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. <i>(NASA/JPL-Caltech)</i></span></sub>
 </p>
 <br>
 
@@ -39,7 +39,7 @@ Besides assessing past habitability, exploring the elemental composition of samp
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-selfie-bd.webp" alt="" width="98%">
 <br>
-<sup>Curiosity takes a self-portrait (selfie) and captures a photo of earth that puts things into perspective <i>NASA/JPL-Caltech</i></sup>
+<sup>Curiosity takes a self-portrait (selfie) and captures a photo of earth that puts things into perspective. <i>(NASA/JPL-Caltech)</i></sup>
 </p>
 
 ### The Gist of Robotics
@@ -69,7 +69,7 @@ The project is carried out in a simulation environment built with the [Unity gam
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/sim_screenshot.webp" alt="" width="98%">
 <br>
-<sup> The simulator in Training Mode. <i>Udacity</i></sup>
+<sup> The simulator in Training Mode. <i>(Udacity)</i></sup>
 </p>
 
 However, to use the simulator in *Autonomous Mode*, the rover will have to be programmed for autonomous action. This will require [Python 3](https://www.python.org/downloads/) as the programming language, along with the following [package dependencies](https://www.activestate.com/resources/quick-reads/python-dependencies-everything-you-need-to-know/):
@@ -104,7 +104,7 @@ Udacity's minimum criteria is to map at least 40% of the mission area at 60% fid
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/min_requirements.webp" alt="" width="75%">
 <br>
-<sup> Results of a mission run in the simulator. <i>Udacity</i></sup>
+<sup> Results of a mission run in the simulator. <i>(Udacity)</i></sup>
 </p>
 <br>
 
@@ -116,7 +116,7 @@ Our mission, should we choose to accept it, is to locate *and* collect *all* six
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/rover-auto-trim-compress-v2.gif" alt="" width="75%">
 <br>
-<sup> The rover in autonomous mode. <i>Udacity</i></sup>
+<sup> The rover in autonomous mode. <i>(Udacity)</i></sup>
 </p>
 
 In the best-case scenario, the entire environment is mapped at nearly 100% fidelity, but this may be beyond the scope of this project.
@@ -145,7 +145,7 @@ Pixels in an incoming camera image can be stored as an indexed collection of dat
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/image-as-array.webp" alt="" width="55%">
 <br>
-<sup>&nbsp;Storing an image as an array. <i>Eye image: Paul Howson / tdgq.com.au)</i></sup>
+<sup>&nbsp;Storing an image as an array. <i>(Eye image: Paul Howson / tdgq.com.au)</i></sup>
 </p>
 
 Images from the rover cam have a dimension of 320x160 pixels. These can be stored as [NumPy](https://numpy.org/) arrays—of type 8-[bit](https://en.wikipedia.org/wiki/Bit) [unsigned integer](https://users.cs.utah.edu/~germain/PPS/Topics/unsigned_integer.html) (uint8)—defined as (160, 320, 3), meaning the image size is 160 pixels in the y-direction (height), 320 pixels in the x-direction (width), and it has three layers, or "color channels." These three color channels of the image are the primary additive colors of red, green, and blue, or "RGB." These can be mixed (per the [RGB color model](https://en.wikipedia.org/wiki/RGB_color_model)) to produce a broad array of colors. More specifically, the combination of intensity values from 0 to 255 across these three channels determines what color is seen in the image. Darker pixels have low intensity values, while brighter pixels have high values. The color black (darkest) has an RGB value of R = 0, G = 0, B = 0, or simply (0, 0, 0), while the color white (brightest) has an RGB value of (255, 255, 255).
@@ -292,7 +292,7 @@ Ideally, the rover should cover (or map) as much of the world (the designated mi
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/ground_truth_map.webp" alt="" width="40%">
 <br>
-<sub> The ground truth map of the world covers a 0.2 square kilometer mission area. <i>Udacity</i></sub>
+<sub> The ground truth map of the world covers a 0.2 square kilometer mission area. <i>(Udacity)</i></sub>
 </p>
 <br>
 
@@ -302,7 +302,7 @@ To compare the actual coverage of the mission area with its ground truth, we hav
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/rover-to-world-bd.webp" alt="" width="98%">
 <br>
-<sup> Transforming the rover's coordinate frame to the world coordinate frame. <i>Udacity</i></sup>
+<sup> Transforming the rover's coordinate frame to the world coordinate frame. <i>(Udacity)</i></sup>
 </p>
 
 The *rover coordinate frame* can be [geometrically transformed](https://en.wikipedia.org/wiki/Geometric_transformation) to the *world coordinate frame* by (1) [rotating](https://en.wikipedia.org/wiki/Rotation_matrix) the frame with an angle equal to the rover's [yaw angle](https://en.wikipedia.org/wiki/Yaw_(rotation)) and (2) [translating](https://en.wikipedia.org/wiki/Translation_(geometry)) it with a displacement equal to the rover's position. This is done in the `rover_to_world` function in the perception module.
@@ -365,7 +365,7 @@ The strategy for locating and collecting rock samples is devised in such a way t
 <p align="left"; style="line-height: 100% !important">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/rock-pickup2.gif" alt="" width="65%">
 <br>
-<sup> Retrieving the target rock sample. <i>Udacity</i></sup>
+<sup> Retrieving the target rock sample. <i>(Udacity)</i></sup>
 </p>
 
 <!--~~The `GoToSample` class governs the actions taken in this state while the `going_to_sample` function handles transitions from this state.~~-->
