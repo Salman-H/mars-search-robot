@@ -29,7 +29,7 @@ And while this is not direct evidence to support life beyond Earth, these are im
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
 <br>
-<sub>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sub>
+<sub>The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. <span style="color:#808080;">(Credit: NASA/JPL-Caltech)</span></sub>
 </p>
 <br>
 
@@ -167,7 +167,7 @@ A color threshold converts a color image to a black-and-white image, highlightin
 
 In other words, it takes an input color image, discards all pixels from the image with intensity values below the threshold, and outputs a binary, black-and-white image with only those pixels whose intensity values fall above the threshold.
 
-We need a color threshold that can distinguish between navigable (ground) and non-navigable terrain (rocks and mountains). From some trial and error, we find that above an RGB threshold of (160, 160, 160), only ground pixels can be seen.
+We need a threshold that can distinguish between navigable (ground) and non-navigable terrain (rocks and mountains). From trial and error, we find that above an RGB threshold of (160, 160, 160), only ground pixels can be seen.
 
 <br>
 <p align="left"; style="line-height: 100% !important">
