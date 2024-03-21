@@ -27,7 +27,6 @@ And while this is not direct evidence to support life beyond Earth, these are im
 
 <p align="left">
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/mars-landing-bd.webp" alt="" width="98%">
-<br>
 <p>
 <sup>  The Mars Reconnaissance Orbiter, a NASA satellite in Mars orbit, captures Curiosity's successful 2012 entry into the Martian atmosphere and tracks its landing and first movements. (Credit: NASA/JPL-Caltech)</sup>
 </p>
