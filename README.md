@@ -128,9 +128,7 @@ The rover should be able to see where to drive and where not to, e.g., rocks and
 In these incoming images from the rover cam, only three regions concern us:
 
 - the navigable regions, where the rover can drive—these make up most of the ground terrain,
-
 - the non-navigable regions, or obstacles, where the rover cannot drive: rocks and mountains, and
-
 - the target samples themselves, which are gold-ish-colored rocks.
 
 These three regions of interest, or ROIs, are referred to in the code as *nav*, *obs*, and *rocks* for short.
