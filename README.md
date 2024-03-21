@@ -109,7 +109,7 @@ In contrast, the objective of the NASA Sample Return Challenge is not only to lo
 Our mission, should we choose to accept it, is to locate *and* collect *all* six samples and bring them back to the starting point while mapping at least 90% of world with over 75% fidelity in the least possible amount of time.
 
 <p align="left"; style="line-height: 100% !important">
-<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/rover-auto-trim.gif" alt="" width="75%">
+<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/rover-auto-trim-compress-v2.gif" alt="" width="75%">
 <br>
 <sup> The rover in autonomous mode. (Credit: Udacity)</sup>
 </p>
