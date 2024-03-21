@@ -2,10 +2,10 @@
 <!--# Converting a Land Rover Into a Search Robot With Only a Camera
  -->
 
-Autonomous search and retrieval of samples of interest on a simulated Martian terrain using Python, OpenCV, and Unity.
+#### Autonomous search and retrieval of samples of interest on a simulated Martian terrain using Python, OpenCV, and Unity.
 
 <p align="left"; style="line-height: 100% !important">
-<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/title-displays-1.webp" alt="" width="90%">
+<img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/title-displays-1.webp" alt="" width="99%">
 <br>
 <sup>Credit: Udacity</sup>
 </p>
