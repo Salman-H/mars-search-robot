@@ -271,7 +271,7 @@ There's a better approach, though. Instead of adding an offset to the nav angle,
 <img src="https://github.com/Salman-H/mars-search-robot/raw/master/figures/wall-following-v2.webp" alt="" width="95%">
 <br>
 <sub> The wall-following approach. Recall that the rover heading (where the rover points) is defined by the x-axis of the Rover Coordinate Frame.</sub>
-<sub>
+</p>
 <br>
 
 In the illustration above:
