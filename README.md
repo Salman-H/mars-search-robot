@@ -52,7 +52,9 @@ In this project, we will undertake a simplified version of this challenge based 
 
 The project is carried out in a simulation environment built with the [Unity game engine](https://unity.com/). You can download the simulator from the following links, depending on your OS: 
 
-[<button>Windows</button>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)
+<button>Windows</button>
+
+https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip
 
 [<button>MacOS</button>](https://s3-us-west-1.amazonaws.com/udacity-robotics/Rover+Unity+Sims/Windows_Roversim.zip)
 
