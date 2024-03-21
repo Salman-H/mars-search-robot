@@ -471,4 +471,4 @@ A reimplementation in [C++](https://medium.com/nerd-for-tech/why-c-is-the-best-p
 ------------
 > Copyright © 2017-2024, Salman Hashmi.
 
-[![License: BSD](https://img.shields.io/badge/License-BSD-brightgreen.svg)](https://github.com/Salman-H/mars-search-robot?tab=License-1-ov-file) 
+[![License: BSD](https://img.shields.io/badge/License-BSD-brightgreen.svg)](https://github.com/Salman-H/mars-search-robot?tab=License-1-ov-file#readme) 
